@@ -2,16 +2,121 @@
 <html>
     <head>
         <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>{% block title %}Welcome!{% endblock %}</title>
         <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>⚫️</text><text y=%221.3em%22 x=%220.2em%22 font-size=%2276%22 fill=%22%23fff%22>sf</text></svg>">
         {% block stylesheets %}
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+            <style>
+                .navbar {
+                    background-color: #2c3e50;
+                    padding: 1rem;
+                    color: white;
+                }
+
+                .navbar-brand {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                }
+
+                .navbar-logo {
+                    color: white;
+                    text-decoration: none;
+                    font-size: 1.5rem;
+                    font-weight: bold;
+                }
+
+                .navbar-burger {
+                    display: none;
+                    background: none;
+                    border: none;
+                    cursor: pointer;
+                    padding: 0.5rem;
+                }
+
+                .navbar-burger span {
+                    display: block;
+                    width: 25px;
+                    height: 3px;
+                    background-color: white;
+                    margin: 5px 0;
+                    transition: all 0.3s ease;
+                }
+
+                .navbar-menu {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                }
+
+                .navbar-start, .navbar-end {
+                    display: flex;
+                    align-items: center;
+                }
+
+                .navbar-item {
+                    color: white;
+                    text-decoration: none;
+                    padding: 0.5rem 1rem;
+                    transition: background-color 0.3s;
+                }
+
+                .navbar-item:hover {
+                    background-color: #34495e;
+                }
+
+                @media (max-width: 768px) {
+                    .navbar-burger {
+                        display: block;
+                    }
+
+                    .navbar-menu {
+                        display: none;
+                        flex-direction: column;
+                        width: 100%;
+                        position: absolute;
+                        top: 70px;
+                        left: 0;
+                        background-color: #2c3e50;
+                    }
+
+                    .navbar-menu.is-active {
+                        display: flex;
+                    }
+
+                    .navbar-start, .navbar-end {
+                        flex-direction: column;
+                        width: 100%;
+                    }
+
+                    .navbar-item {
+                        width: 100%;
+                        text-align: center;
+                    }
+                }
+            </style>
         {% endblock %}
+
+        {# {% block javascripts %}
+            {% block importmap %}{{ importmap('app') }}{% endblock %}
+        {% endblock %} #}
+    </head>
+    <body>
+        {% include 'partials/_navbar.html.twig' %}
+
+        {% block body %}{% endblock %}
 
         {% block javascripts %}
             {% block importmap %}{{ importmap('app') }}{% endblock %}
+            <script>
+                function toggleMenu() {
+                    const menu = document.querySelector('.navbar-menu');
+                    const burger = document.querySelector('.navbar-burger');
+                    menu.classList.toggle('is-active');
+                    burger.classList.toggle('is-active');
+                }
+            </script>
         {% endblock %}
-    </head>
-    <body>
-        {% block body %}{% endblock %}
     </body>
 </html>

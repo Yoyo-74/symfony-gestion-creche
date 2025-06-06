@@ -1,0 +1,41 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Calendar index{% endblock %}
+
+{% block body %}
+    <h1>Calendar index</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Date</th>
+                <th>Day</th>
+                <th>Week</th>
+                <th>Isopen</th>
+                <th>actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for calendar in calendars %}
+            <tr>
+                <td>{{ calendar.id }}</td>
+                <td>{{ calendar.date ? calendar.date|date('Y-m-d') : '' }}</td>
+                <td>{{ calendar.day }}</td>
+                <td>{{ calendar.week }}</td>
+                <td>{{ calendar.isopen ? 'Yes' : 'No' }}</td>
+                <td>
+                    <a href="{{ path('app_calendar_show', {'id': calendar.id}) }}">show</a>
+                    <a href="{{ path('app_calendar_edit', {'id': calendar.id}) }}">edit</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="6">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_calendar_new') }}">Create new</a>
+{% endblock %}

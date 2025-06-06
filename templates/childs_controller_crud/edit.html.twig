@@ -1,0 +1,13 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Edit Childs{% endblock %}
+
+{% block body %}
+    <h1>Edit Childs</h1>
+
+    {{ include('childs_controller_crud/_form.html.twig', {'button_label': 'Update'}) }}
+
+    <a href="{{ path('app_childs_controller_c_r_u_d_index') }}">back to list</a>
+
+    {{ include('childs_controller_crud/_delete_form.html.twig') }}
+{% endblock %}

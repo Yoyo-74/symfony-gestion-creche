@@ -1,0 +1,11 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}New Childs{% endblock %}
+
+{% block body %}
+    <h1>Create new Childs</h1>
+
+    {{ include('childs_controller_crud/_form.html.twig') }}
+
+    <a href="{{ path('app_childs_controller_c_r_u_d_index') }}">back to list</a>
+{% endblock %}

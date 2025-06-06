@@ -1,0 +1,60 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Tableau de bord Crèche{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            padding: 20px;
+        }
+        .stat-card {
+            background-color: #fff;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .stat-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #2c3e50;
+            margin: 10px 0;
+        }
+        .stat-label {
+            color: #7f8c8d;
+            font-size: 1.1em;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+    <div class="container">
+        <h1 class="my-4">Tableau de bord de la crèche</h1>
+        
+        <div class="stats-container">
+            <div class="stat-card">
+                <div class="stat-number">{{ stats.totalEnfants }}</div>
+                <div class="stat-label">Enfants inscrits</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-number">{{ stats.enfantsAujourdhui }}</div>
+                <div class="stat-label">Enfants prévus aujourd'hui</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-number">{{ stats.enfantsPresents }}</div>
+                <div class="stat-label">Enfants présents</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-number">{{ stats.repasAPrevoir }}</div>
+                <div class="stat-label">Repas à prévoir</div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

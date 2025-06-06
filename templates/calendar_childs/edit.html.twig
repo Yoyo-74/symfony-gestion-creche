@@ -1,0 +1,13 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Edit CalendarChilds{% endblock %}
+
+{% block body %}
+    <h1>Edit CalendarChilds</h1>
+
+    {{ include('calendar_childs/_form.html.twig', {'button_label': 'Update'}) }}
+
+    <a href="{{ path('app_calendar_childs_index') }}">back to list</a>
+
+    {{ include('calendar_childs/_delete_form.html.twig') }}
+{% endblock %}
