@@ -1,0 +1,41 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}CalendarChilds index{% endblock %}
+
+{% block body %}
+    <h1>CalendarChilds index</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Date</th>
+                <th>Heure_arrivee</th>
+                <th>Heure_depart</th>
+                <th>Ispresent</th>
+                <th>actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for calendar_child in calendar_childs %}
+            <tr>
+                <td>{{ calendar_child.id }}</td>
+                <td>{{ calendar_child.date ? calendar_child.date|date('Y-m-d') : '' }}</td>
+                <td>{{ calendar_child.heureArrivee ? calendar_child.heureArrivee|date('H:i:s') : '' }}</td>
+                <td>{{ calendar_child.heureDepart ? calendar_child.heureDepart|date('H:i:s') : '' }}</td>
+                <td>{{ calendar_child.ispresent ? 'Yes' : 'No' }}</td>
+                <td>
+                    <a href="{{ path('app_calendar_childs_show', {'id': calendar_child.id}) }}">show</a>
+                    <a href="{{ path('app_calendar_childs_edit', {'id': calendar_child.id}) }}">edit</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="6">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_calendar_childs_new') }}">Create new</a>
+{% endblock %}
