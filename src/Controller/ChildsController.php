@@ -2,109 +2,46 @@
 
 namespace App\Controller;
 
+use DateTime;
+use DatePeriod;
+use DateInterval;
 use App\Entity\Childs;
 use App\Entity\Calendar;
-use App\Form\ChildsType;
-// use App\Entity\UsersChilds;
-// use App\Entity\ResponsablesChilds;
+use App\Entity\Responsables;
 use App\Entity\CalendarChilds;
+use App\Entity\ResponsablesChilds;
+use App\Form\ChildsForm;
+use App\Form\ResponsablesForm;
 use App\Repository\ChildsRepository;
-// use App\Repository\UsersRepository;
-// use App\Repository\ResponsablesRepository;
-use App\Repository\CalendarRepository;
+use App\Repository\ResponsablesRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 #[Route('/childs')]
-class ChildsController extends AbstractController
+final class ChildsController extends AbstractController
 {
+    #[Route(name: 'app_childs_index', methods: ['GET'])]
+    public function index(): Response
+    {
+        return $this->render('childs/index.html.twig');
+    }
+
     #[Route('/new', name: 'app_childs_new', methods: ['GET', 'POST'])]
-    public function new(
-        Request $request, 
-        EntityManagerInterface $em, 
-        CalendarRepository $calendarRepository,
-        // UsersRepository $usersRepository,
-        // ResponsablesRepository $responsablesRepository
-    ): Response {
+    public function new(Request $request, EntityManagerInterface $entityManager): Response
+    {
         $child = new Childs();
-        $form = $this->createForm(ChildsType::class, $child);
-    //     $form = $this->createForm(ChildsType::class, $child, [
-    //     'allow_new_responsable' => true,
-    //     'allow_new_user' => true
-    // ]);
+        $form = $this->createForm(ChildsForm::class, $child);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            // Sauvegarde de l'enfant
-            $em->persist($child);
+            $entityManager->persist($child);
+            $entityManager->flush();
 
-            // Gestion des responsables
-            // $responsables = $form->get('responsables')->getData();
-            // $newResponsables = $form->get('new_responsables')->getData();
-            
-            // foreach ($newResponsables as $newResponsableData) {
-            //     $responsable = new Responsables();
-            //     $responsable->setNom($newResponsableData['nom']);
-            //     $responsable->setPrenom($newResponsableData['prenom']);
-            //     $responsable->setEmail($newResponsableData['email']);
-            //     $responsable->setTelephone($newResponsableData['telephone']);
-            //     $em->persist($responsable);
-                
-            //     $responsables[] = $responsable;
-            // }
-
-            // foreach ($responsables as $responsable) {
-            //     $responsablesChilds = new ResponsablesChilds();
-            //     $responsablesChilds->setChild($child);
-            //     $responsablesChilds->setResponsable($responsable);
-            //     $responsablesChilds->setLien($form->get('lien_' . $responsable->getId())->getData());
-            //     $em->persist($responsablesChilds);
-            // }
-
-            // Gestion des users (personnel) existants et nouveaux
-            // $users = $form->get('users')->getData();
-            // $newUsers = $form->get('new_users')->getData();
-
-            // foreach ($newUsers as $newUserData) {
-            //     $user = new Users();
-            //     $user->setEmail($newUserData['email']);
-            //     $user->setRoles(['ROLE_STAFF']);
-            //     $user->setPassword($this->passwordHasher->hashPassword($user, $newUserData['password']));
-            //     $user->setNom($newUserData['nom']);
-            //     $user->setPrenom($newUserData['prenom']);
-            //     $em->persist($user);
-                
-            //     $users[] = $user;
-            // }
-
-            // foreach ($users as $user) {
-            //     $usersChilds = new UsersChilds();
-            //     $usersChilds->setChild($child);
-            //     $usersChilds->setUser($user);
-            //     $em->persist($usersChilds);
-            // }
-
-            // Récupération des données du planning
-            $planning = $form->get('planning')->getData();
-            $dateDebut = $form->get('dateDebut')->getData();
-            $dateFin = $form->get('dateFin')->getData();
-
-            // Création des entrées dans calendar_childs
-            $this->createCalendarEntries(
-                $child,
-                $planning,
-                $dateDebut,
-                $dateFin,
-                $em,
-                $calendarRepository
-            );
-
-            $em->flush();
-
-            return $this->redirectToRoute('app_childs_index');
+            return $this->redirectToRoute('app_childs_index', [], Response::HTTP_SEE_OTHER);
         }
 
         return $this->render('childs/new.html.twig', [
@@ -113,96 +50,290 @@ class ChildsController extends AbstractController
         ]);
     }
 
+    #[Route('/{id}', name: 'app_childs_show', methods: ['GET'])]
+    public function show(Childs $child): Response
+    {
+        $usersChilds = $child->getUsersChilds();
+        $responsablesChilds = $child->getResponsablesChilds();
+
+        return $this->render('childs/show.html.twig', [
+            'child' => $child,
+            'usersChilds' => $usersChilds,
+            'responsablesChilds' => $responsablesChilds,
+        ]);
+    }
+
+    #[Route('/{id}/edit', name: 'app_childs_edit', methods: ['GET', 'POST'])]
+    public function edit(Request $request, Childs $child, EntityManagerInterface $entityManager): Response
+    {
+        $form = $this->createForm(ChildsForm::class, $child);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            try {
+                // Récupérer les dates et horaires
+                $dateDebut = $form->get('date_debut')->getData();
+                $dateFin = $form->get('date_fin')->getData();
+                
+                // Ne procéder à la mise à jour du calendrier que si les deux dates sont renseignées
+                if ($dateDebut && $dateFin) {
+                    $horaires = [
+                        'lundi_a' => $form->get('lundi_a')->getData(),
+                        'lundi_d' => $form->get('lundi_d')->getData(),
+                        'mardi_a' => $form->get('mardi_a')->getData(),
+                        'mardi_d' => $form->get('mardi_d')->getData(),
+                        'mercredi_a' => $form->get('mercredi_a')->getData(),
+                        'mercredi_d' => $form->get('mercredi_d')->getData(),
+                        'jeudi_a' => $form->get('jeudi_a')->getData(),
+                        'jeudi_d' => $form->get('jeudi_d')->getData(),
+                        'vendredi_a' => $form->get('vendredi_a')->getData(),
+                        'vendredi_d' => $form->get('vendredi_d')->getData(),
+                    ];
+
+                    // Vérifier que la date de fin est postérieure à la date de début
+                    if ($dateFin < $dateDebut) {
+                        throw new \Exception('La date de fin doit être postérieure à la date de début.');
+                    }
+
+                    // Supprimer les anciennes entrées du calendrier pour la période spécifiée
+                    $calendarChildsRepo = $entityManager->getRepository(CalendarChilds::class);
+                    $oldEntries = $calendarChildsRepo->createQueryBuilder('cc')
+                        ->where('cc.child = :child')
+                        ->andWhere('cc.date >= :dateDebut')
+                        ->andWhere('cc.date <= :dateFin')
+                        ->setParameter('child', $child)
+                        ->setParameter('dateDebut', $dateDebut)
+                        ->setParameter('dateFin', $dateFin)
+                        ->getQuery()
+                        ->getResult();
+
+                    foreach ($oldEntries as $entry) {
+                        $entityManager->remove($entry);
+                    }
+                    $entityManager->flush();
+
+                    // Créer les nouvelles entrées du calendrier
+                    $this->createCalendarEntries($child, $horaires, $dateDebut, $dateFin, $entityManager);
+                }
+                
+                $entityManager->flush();
+
+                $this->addFlash('success', 'Les modifications ont été enregistrées avec succès.');
+                return $this->redirectToRoute('app_childs_index', [], Response::HTTP_SEE_OTHER);
+            } catch (\Exception $e) {
+                $this->addFlash('error', 'Une erreur est survenue : ' . $e->getMessage());
+            }
+        }
+
+        return $this->render('childs/edit.html.twig', [
+            'child' => $child,
+            'form' => $form,
+        ]);
+    }
+
     private function createCalendarEntries(
         Childs $child,
-        array $planning,
+        array $horaires,
         \DateTime $dateDebut,
         \DateTime $dateFin,
-        EntityManagerInterface $em,
-        CalendarRepository $calendarRepository
+        EntityManagerInterface $entityManager
     ): void {
+        $calendar = $entityManager->getRepository(Calendar::class);
+        
         $interval = new \DateInterval('P1D');
         $period = new \DatePeriod($dateDebut, $interval, $dateFin);
-        
-    // Tableau de correspondance anglais -> français
-    $daysMap = [
-        'Monday' => 'Lundi',
-        'Tuesday' => 'Mardi',
-        'Wednesday' => 'Mercredi',
-        'Thursday' => 'Jeudi',
-        'Friday' => 'Vendredi',
-        'Saturday' => 'Samedi',
-        'Sunday' => 'Dimanche'
-    ];
-    
-        foreach ($period as $date) {
-            $englishDay = $date->format('l');
-            $frenchDay = $daysMap[$englishDay];
-            
-            if (isset($planning[$frenchDay.'_present']) && 
-                $planning[$frenchDay.'_present'] && 
-                $this->isCreheOpen($date, $calendarRepository)) {
-                
-                $calendar = $calendarRepository->findOneBy(['date' => $date]);
-                if (!$calendar) {
-                    continue;
-                }
 
-                $calendarChild = new CalendarChilds();
-                $calendarChild->setChild($child);
-                $calendarChild->setDate($date);
-                $calendarChild->setIdcalendar($calendar);
-                $calendarChild->setHeureArrivee($planning[$frenchDay.'_arrival']);
-                $calendarChild->setHeureDepart($planning[$frenchDay.'_departure']);
-                $calendarChild->setIspresent(false);
-                
-                $em->persist($calendarChild);
+        // Map des jours avec la première lettre en minuscule pour les clés des horaires
+        $joursSemaine = [
+            'Monday' => ['db' => 'Lundi', 'form' => 'lundi'],
+            'Tuesday' => ['db' => 'Mardi', 'form' => 'mardi'],
+            'Wednesday' => ['db' => 'Mercredi', 'form' => 'mercredi'],
+            'Thursday' => ['db' => 'Jeudi', 'form' => 'jeudi'],
+            'Friday' => ['db' => 'Vendredi', 'form' => 'vendredi']
+        ];
+
+        foreach ($period as $date) {
+            $calendarDay = $calendar->findOneBy(['date' => $date]);
+            
+            if (!$calendarDay || !$calendarDay->isopen()) {
+                continue;
+            }
+
+            $jour = $date->format('l'); // Récupère le jour en anglais
+            if (isset($joursSemaine[$jour])) {
+                $jourForm = $joursSemaine[$jour]['form'];
+                $heureArriveeKey = $jourForm . '_a';
+                $heureDepartKey = $jourForm . '_d';
+
+                if (isset($horaires[$heureArriveeKey]) && isset($horaires[$heureDepartKey])) {
+                    try {
+                        $calendarChild = new CalendarChilds();
+                        $calendarChild->setChild($child);
+                        $calendarChild->setDate($date);
+                        $calendarChild->setIdcalendar($calendarDay);
+                        $calendarChild->setHeureArrivee($horaires[$heureArriveeKey]);
+                        $calendarChild->setHeureDepart($horaires[$heureDepartKey]);
+                        $calendarChild->setIspresent(false);
+                        
+                        $entityManager->persist($calendarChild);
+                    } catch (\Exception $e) {
+                        throw new \Exception('Erreur lors de la création du planning : ' . $e->getMessage());
+                    }
+                }
             }
         }
     }
 
-    private function isCreheOpen(\DateTime $date, CalendarRepository $calendarRepository): bool
-    {
-        $calendar = $calendarRepository->findOneBy(['date' => $date]);
-        return $calendar ? $calendar->isopen() : false;
-    }
-
     #[Route('/{id}', name: 'app_childs_delete', methods: ['POST'])]
-    public function delete(
-        Request $request, 
-        Childs $child, 
-        EntityManagerInterface $em
-    ): Response {
-        if ($this->isCsrfTokenValid('delete'.$child->getId(), $request->request->get('_token'))) {
-            // Suppression des relations
-            // foreach ($child->getResponsablesChilds() as $responsablesChild) {
-            //     $em->remove($responsablesChild);
-            // }
-            
-            // foreach ($child->getUsersChilds() as $usersChild) {
-            //     $em->remove($usersChild);
-            // }
-            
-            // foreach ($child->getCalendarChilds() as $calendarChild) {
-            //     $em->remove($calendarChild);
-            // }
-
-            // Suppression de l'enfant
-            $em->remove($child);
-            $em->flush();
-            return $this->redirectToRoute('app_childs_index');
-        }   
-        return $this->render('childs/new.html.twig', [
-        'child' => $child,
-        'form' => $form,
-    ]);
-    }
-    #[Route(name: 'app_childs_index', methods: ['GET'])]
-    public function index(ChildsRepository $childsRepository): Response
+    public function delete(Request $request, Childs $child, EntityManagerInterface $entityManager): Response
     {
-        return $this->render('childs_controller_crud/index.html.twig', [
-            'childs' => $childsRepository->findAll(),
+        if ($this->isCsrfTokenValid('delete'.$child->getId(), $request->getPayload()->getString('_token'))) {
+            $entityManager->remove($child);
+            $entityManager->flush();
+        }
+
+        return $this->redirectToRoute('app_childs_index', [], Response::HTTP_SEE_OTHER);
+    }
+
+    #[Route('/{id}/remove-responsable/{responsableId}', name: 'app_childs_remove_responsable', methods: ['POST'])]
+    public function removeResponsable(
+        Childs $child,
+        int $responsableId,
+        EntityManagerInterface $entityManager,
+        ResponsablesRepository $responsablesRepository
+    ): JsonResponse {
+        $responsable = $responsablesRepository->find($responsableId);
+        
+        if (!$responsable) {
+            return new JsonResponse(['success' => false, 'message' => 'Responsable non trouvé'], 404);
+        }
+
+        // Chercher la relation ResponsablesChilds
+        $responsablesChilds = $entityManager->getRepository(ResponsablesChilds::class)
+            ->findOneBy(['child' => $child, 'responsable' => $responsable]);
+
+        if (!$responsablesChilds) {
+            return new JsonResponse(['success' => false, 'message' => 'Relation non trouvée'], 404);
+        }
+
+        $entityManager->remove($responsablesChilds);
+        $entityManager->flush();
+
+        return new JsonResponse(['success' => true]);
+    }
+
+    #[Route('/{id}/add-responsable-form', name: 'app_childs_add_responsable_form', methods: ['GET'])]
+    public function addResponsableForm(
+        Childs $child,
+        ResponsablesRepository $responsablesRepository
+    ): Response {
+        // Récupérer tous les responsables qui ne sont pas déjà associés à cet enfant
+        $existingResponsableIds = $child->getResponsablesChilds()
+            ->map(fn($rc) => $rc->getResponsable()->getId())
+            ->toArray();
+
+        $availableResponsables = $responsablesRepository->createQueryBuilder('r')
+            ->where('r.id NOT IN (:ids)')
+            ->setParameter('ids', $existingResponsableIds ?: [0])
+            ->getQuery()
+            ->getResult();
+
+        return $this->render('childs/_add_responsable_form.html.twig', [
+            'child' => $child,
+            'responsables' => $availableResponsables,
         ]);
     }
 
+    #[Route('/{id}/add-responsable', name: 'app_childs_add_responsable', methods: ['POST'])]
+    public function addResponsable(
+        Request $request,
+        Childs $child,
+        EntityManagerInterface $entityManager,
+        ResponsablesRepository $responsablesRepository
+    ): JsonResponse {
+        $responsableId = $request->request->get('responsable_id');
+        $responsable = $responsablesRepository->find($responsableId);
+
+        if (!$responsable) {
+            return new JsonResponse(['success' => false, 'message' => 'Responsable non trouvé'], 404);
+        }
+
+        // Vérifier si la relation n'existe pas déjà
+        $existingRelation = $entityManager->getRepository(ResponsablesChilds::class)
+            ->findOneBy(['child' => $child, 'responsable' => $responsable]);
+
+        if ($existingRelation) {
+            return new JsonResponse(['success' => false, 'message' => 'Ce responsable est déjà associé à cet enfant'], 400);
+        }
+
+        // Créer la nouvelle relation
+        $responsablesChilds = new ResponsablesChilds();
+        $responsablesChilds->setChild($child);
+        $responsablesChilds->setResponsable($responsable);
+
+        $entityManager->persist($responsablesChilds);
+        $entityManager->flush();
+
+        return new JsonResponse([
+            'success' => true,
+            'responsable' => [
+                'id' => $responsable->getId(),
+                'nom' => $responsable->getNom(),
+                'prenom' => $responsable->getPrenom(),
+                'tel' => $responsable->getTel(),
+            ],
+        ]);
+    }
+
+    #[Route('/{id}/add-new-responsable', name: 'app_childs_add_new_responsable', methods: ['POST'])]
+    public function addNewResponsable(
+        Request $request,
+        Childs $child,
+        EntityManagerInterface $entityManager
+    ): JsonResponse {
+        $data = json_decode($request->getContent(), true);
+        
+        if (!$data) {
+            return new JsonResponse(['success' => false, 'message' => 'Données invalides'], 400);
+        }
+
+        try {
+            // Créer le nouveau responsable
+            $responsable = new Responsables();
+            $responsable->setNom($data['nom']);
+            $responsable->setPrenom($data['prenom']);
+            $responsable->setEmail($data['email']);
+            $responsable->setTel($data['tel']);
+            
+            $entityManager->persist($responsable);
+            $entityManager->flush(); // Pour obtenir l'ID du responsable
+
+            // Créer la relation ResponsablesChilds
+            $responsablesChilds = new ResponsablesChilds();
+            $responsablesChilds->setChild($child);
+            $responsablesChilds->setResponsable($responsable);
+            $responsablesChilds->setLien($data['lien']);
+            
+            $entityManager->persist($responsablesChilds);
+            $entityManager->flush();
+
+            return new JsonResponse([
+                'success' => true,
+                'responsable' => [
+                    'id' => $responsable->getId(),
+                    'nom' => $responsable->getNom(),
+                    'prenom' => $responsable->getPrenom(),
+                    'tel' => $responsable->getTel(),
+                    'email' => $responsable->getEmail(),
+                    'lien' => $data['lien']
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            return new JsonResponse([
+                'success' => false,
+                'message' => 'Erreur lors de l\'ajout du responsable : ' . $e->getMessage()
+            ], 500);
+        }
+    }
 }

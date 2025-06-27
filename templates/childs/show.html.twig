@@ -1,0 +1,252 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Détails de l'enfant{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .container{
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .info-section {
+            margin: 2rem 0;
+            padding: 1rem;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .info-card {
+            background: #f8f9fa;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 1rem;
+            transition: transform 0.2s;
+        }
+
+        .info-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .info-header {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .info-item {
+            margin: 0.5rem 0;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .info-label {
+            font-weight: bold;
+            color: #7f8c8d;
+        }
+
+        .info-value {
+            color: #2c3e50;
+        }
+
+        .action-buttons {
+            margin-top: 2rem;
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: background-color 0.2s;
+        }
+
+        .btn-primary {
+            background-color: #3498db;
+            color: white;
+        }
+
+        .btn-secondary {
+            background-color: #95a5a6;
+            color: white;
+        }
+
+        .btn-danger {
+            background-color: #e74c3c;
+            color: white;
+        }
+
+        .calendar-legend {
+            display: flex;
+            gap: 1rem;
+            margin: 1rem 0;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+        }
+
+        .legend-present {
+            background-color: #28a745;
+        }
+
+        .legend-absent {
+            background-color: #ffc107;
+        }
+    </style>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+{% endblock %}
+
+{% block body %}
+    <div class="container">
+        <div class="info-section">
+            <h1 class="info-header">{{ child.prenom }} {{ child.nom }}</h1>
+            
+            <div class="info-grid">
+                <div class="info-card">
+                    <h2 class="info-header">Informations personnelles</h2>
+                    <div class="info-item">
+                        <span class="info-label">Date de naissance</span>
+                        <span class="info-value">{{ child.dateNaissance ? child.dateNaissance|date('d/m/Y') : '' }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Genre</span>
+                        <span class="info-value">{{ child.genre }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Allergies</span>
+                        <span class="info-value">{{ child.allergies ?: 'Aucune' }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Remarques médicales</span>
+                        <span class="info-value">{{ child.remarquesMedicales ?: 'Aucune' }}</span>
+                    </div>
+                </div>
+
+                <div class="info-card">
+                    <h2 class="info-header">Informations administratives</h2>
+                    <div class="info-item">
+                        <span class="info-label">Date d'entrée</span>
+                        <span class="info-value">{{ child.dateEntree ? child.dateEntree|date('d/m/Y') : '' }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Date de sortie</span>
+                        <span class="info-value">{{ child.dateSortie ? child.dateSortie|date('d/m/Y') : 'Non définie' }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Revenus</span>
+                        <span class="info-value">{{ child.revenus ? child.revenus ~ ' €' : 'Non renseigné' }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="info-section">
+            <h2 class="info-header">Calendrier des présences</h2>
+            <div class="calendar-legend">
+                <div class="legend-item">
+                    <div class="legend-color legend-present"></div>
+                    <span>Présent</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color legend-absent"></div>
+                    <span>Absent</span>
+                </div>
+            </div>
+            {{ component('child_calendar_component', { childId: child.id }) }}
+        </div>
+
+        <div class="info-section">
+            <h2 class="info-header">Utilisateurs associés</h2>
+            <div class="info-grid">
+                {% if usersChilds is not empty %}
+                    {% for userChild in usersChilds %}
+                        <div class="info-card">
+                            <div class="info-item">
+                                <span class="info-label">Nom</span>
+                                <span class="info-value">{{ userChild.user.nom }}</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Prénom</span>
+                                <span class="info-value">{{ userChild.user.prenom }}</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Email</span>
+                                <span class="info-value">{{ userChild.user.email }}</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Tel</span>
+                                <span class="info-value">{{ userChild.user.tel }}</span>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p>Aucun utilisateur associé</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="info-section">
+            <h2 class="info-header">Responsables</h2>
+            <div class="info-grid">
+                {% if responsablesChilds is not empty %}
+                    {% for respChild in responsablesChilds %}
+                        <div class="info-card">
+                            <div class="info-item">
+                                <span class="info-label">Nom</span>
+                                <span class="info-value">{{ respChild.responsable.nom }}</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Prénom</span>
+                                <span class="info-value">{{ respChild.responsable.prenom }}</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Email</span>
+                                <span class="info-value">{{ respChild.responsable.email }}</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Téléphone</span>
+                                <span class="info-value">{{ respChild.responsable.tel }}</span>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p>Aucun responsable associé</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="action-buttons">
+            <a href="{{ path('app_childs_index') }}" class="btn btn-secondary">Retour à la liste</a>
+            <a href="{{ path('app_childs_edit', {'id': child.id}) }}" class="btn btn-primary">Modifier</a>
+            {{ include('childs/_delete_form.html.twig') }}
+        </div>
+    </div>
+{% endblock %}

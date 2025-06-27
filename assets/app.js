@@ -7,4 +7,11 @@ import './bootstrap.js';
  */
 import './styles/app.css';
 
-console.log('This log comes from assets/app.js - welcome to AssetMapper! 🎉');
+// console.log('This log comes from assets/app.js - welcome to AssetMapper! 🎉');
+
+
+// Désactiver le cache de Turbo si nécessaire
+document.addEventListener('turbo:load', () => {
+    // Initialisation globale si nécessaire
+    console.log('Page chargée avec Turbo');
+});

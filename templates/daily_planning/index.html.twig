@@ -1,6 +1,7 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Planning du {{ current_date|date('d/m/Y') }}{% endblock %}
+{# {% block title %}Planning du {{ current_date|date('d/m/Y') }}{% endblock %} #}
+{% block title %}Planning du {{ date|date('d/m/Y') }}{% endblock %}
 
 {% block stylesheets %}
     {{ parent() }}
@@ -61,19 +62,19 @@
         .table {
             padding: 10px;
             background:rgb(228, 228, 228);
-    border-collapse: separate;
+            border-collapse: separate;
 
-    border-spacing: 0 15px; /* Espace entre les lignes */
-    margin: 20px auto;
-    border-radius: 10px;
+            border-spacing: 0 15px; /* Espace entre les lignes */
+            margin: 20px auto;
+            border-radius: 10px;
     
 }
 
-thead {
+{# thead {
     
     background: RGB(228, 228, 228);
-background: linear-gradient(266deg, rgba(228, 228, 228, 1) 0%, rgba(160, 160, 160, 1) 26%, rgba(160, 160, 160, 1) 85%, rgba(228, 228, 228, 1) 100%);
-}
+    background: linear-gradient(266deg, rgba(228, 228, 228, 1) 0%, rgba(160, 160, 160, 1) 26%, rgba(160, 160, 160, 1) 85%, rgba(228, 228, 228, 1) 100%);
+} #}
 
 .presence-cell {
     width: 55px;
@@ -93,8 +94,13 @@ background: linear-gradient(266deg, rgba(228, 228, 228, 1) 0%, rgba(160, 160, 16
 }
 
 .present {
-    background-color: #28a745 !important; /* Vert pour indiquer la présence */
-    z-index: 20 !important;
+    background-color: #28a745; /* Vert pour indiquer la présence */
+    z-index: 20;
+}
+
+.absent {
+    background-color:rgb(221, 46, 46); /* Rouge pour indiquer l'absence */
+    z-index: 20;
 }
 
 .first{
@@ -130,33 +136,290 @@ th { text-align: left; }
     vertical-align: top;
 }
 
+.switch-container {
+    display: inline-flex;
+    align-items: center;
+}
+
+.switch-checkbox {
+    height: 0;
+    width: 0;
+    visibility: hidden;
+}
+
+.switch-label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    gap: 10px;
+}
+
+.switch-button {
+    position: relative;
+    display: block;
+    width: 60px;
+    height: 30px;
+    background: #e0e0e0;
+    border-radius: 100px;
+    transition: 0.3s;
+}
+
+.switch-button:after {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 24px;
+    height: 24px;
+    background: #fff;
+    border-radius: 50%;
+    transition: 0.3s;
+}
+
+.switch-checkbox:checked + .switch-label .switch-button {
+    background: #28a745;
+}
+
+.switch-checkbox:checked + .switch-label .switch-button:after {
+    left: calc(100% - 3px);
+    transform: translateX(-100%);
+}
+
+.switch-text {
+    font-size: 14px;
+    color: #333;
+    user-select: none;
+}
+
+/* Animation au survol */
+.switch-button:hover {
+    opacity: 0.8;
+}
+
+/* Focus pour l'accessibilité */
+.switch-checkbox:focus + .switch-label .switch-button {
+    box-shadow: 0 0 0 2px rgba(0,0,0,0.1);
+}
+
+
+{# TEST MATTHIEU #}
+.planning-container{
+    margin-top: 1rem;
+}
+.planning-container .week-navigation {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+.planning-container .week-navigation .week-nav-button {
+  text-decoration: none;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: flex-start;
+  margin-top: 4rem;
+}
+.planning-container .week-navigation .week-nav-button:first-child {
+  margin-right: 2rem;
+}
+.planning-container .week-navigation .week-nav-button:last-child {
+  margin-right: 2rem;
+}
+.planning-container .week-navigation .week-nav-button .nav-icon {
+  width: 80px;
+  height: 80px;
+  fill: rgb(108, 116, 124);
+  transition: fill 0.3s ease;
+}
+.planning-container .week-navigation .week-nav-button .nav-icon:hover {
+  fill: rgb(248, 144, 99);
+}
+.planning-container .week-navigation .week-info {
+  margin: 0 3rem;
+}
+.planning-container .week-navigation .week-info .week-number {
+  text-align: center;
+  font-size: 1.5rem;
+  font-weight: 500;
+  margin-bottom: 2rem;
+}
+.planning-container .week-navigation .week-info .weekdays {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+.planning-container .week-navigation .week-info .weekdays .day-box {
+  width: 150px;
+  aspect-ratio: 1/1;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  color: #333;
+  transition: all 0.2s ease;
+  background: white;
+}
+.planning-container .week-navigation .week-info .weekdays .day-box:hover {
+  border: 1px solid rgb(248, 144, 99);
+}
+.planning-container .week-navigation .week-info .weekdays .day-box.current-day {
+  border-color: #4caf50;
+  background: white;
+  transform: scale(1.05);
+  box-shadow: 0 0 15px rgba(255, 64, 129, 0.3);
+  z-index: 1;
+}
+.planning-container .week-navigation .week-info .weekdays .day-box.current-day .day-number {
+  color: #c2185b;
+}
+.planning-container .week-navigation .week-info .weekdays .day-box.current-day .day-name {
+  color: #880e4f;
+}
+.planning-container .week-navigation .week-info .weekdays .day-box.selected-day {
+  border-color: #4caf50;
+  background: #e8f5e9;
+  transform: scale(1.1);
+  z-index: 1;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+.planning-container .week-navigation .week-info .weekdays .day-box.holiday {
+  background: #fff3e0;
+  border-color: #ff9800;
+}
+.planning-container .week-navigation .week-info .weekdays .day-box.holiday .holiday-indicator {
+  font-size: 0.75rem;
+  color: #f57c00;
+  margin-top: 0.25rem;
+}
+.planning-container .week-navigation .week-info .weekdays .day-box.closed-day {
+  background: #ffebee;
+  border-color: #ef5350;
+}
+.planning-container .week-navigation .week-info .weekdays .day-box.closed-day .closure-indicator {
+  font-size: 0.75rem;
+  color: #c62828;
+  margin-top: 0.5rem;
+  text-align: center;
+  font-weight: 500;
+  padding: 0.25rem 0.5rem;
+  background: rgba(239, 83, 80, 0.1);
+  border-radius: 4px;
+}
+.planning-container .week-navigation .week-info .weekdays .day-box .day-name {
+  font-size: 0.875rem;
+  color: #6c757d;
+  margin-bottom: 0.25rem;
+}
+.planning-container .week-navigation .week-info .weekdays .day-box .day-number {
+  font-size: 1.5rem;
+  font-weight: 500;
+}
+{# FIN MATTHIEU #}
+
+.nbr-childs {
+    font-size: 0.9rem;
+    color: #495057;
+    margin-top: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.nbr-childs i {
+    color: #0d6efd;
+}
 
 
     </style>
 {% endblock %}
 
 {% block body %}
-    <div class="container">
-        <div class="planning-nav">
-            <a href="{{ path('app_daily_planning', {date: previous_date|date('Y-m-d')}) }}" 
+    <div class="container planning-container">
+        {# <div class="planning-nav"> #}
+            {# <a href="{{ path('app_daily_planning', {date: previous_date|date('Y-m-d')}) }}" 
                class="btn btn-outline-primary">
                 <i class="fas fa-chevron-left"></i> Jour précédent
-            </a>
+            </a> #}
             
-            <h2>Planning du {{ current_date|date('d/m/Y') }}</h2>
-            
-            <a href="{{ path('app_daily_planning', {date: next_date|date('Y-m-d')}) }}" 
+            {# <h2>Planning du {{ current_date|date('d/m/Y') }}</h2> #}
+            {# <h2>Planning du {{ date|date('d/m/Y') }}</h2> #}
+            {# <a href="{{ path('app_daily_planning', {date: next_date|date('Y-m-d')}) }}" 
                class="btn btn-outline-primary">
                 Jour suivant <i class="fas fa-chevron-right"></i>
+            </a> #}
+        {# </div> #}
+
+
+
+
+
+        <div class="week-navigation">
+            <a href="{{ path('app_planning_day', {date: date|date_modify('-7 days')|date('Y-m-d')}) }}" class="week-nav-button">
+                <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512">
+                    <path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/>
+                </svg>
+            </a>
+
+            <div class="week-info">
+                <div class="week-number">
+                    {% if weekDays is not empty %}
+                        Semaine {{ weekDays[0].week }}
+                    {% else %}
+                        Semaine {{ date|date('W') }}
+                    {% endif %}
+                    <h2>Planning du {{ date|date('d/m/Y') }}</h2>
+                </div>
+                
+                <div class="weekdays">
+                    {% if weekDays is not empty %}
+                        {% for calendarDay in weekDays %}
+                            {% set isToday = calendarDay.date|date('Y-m-d') == "now"|date('Y-m-d') %}
+                            {% set isopen = calendarDay.isopen == false %}
+                            {# {% set closureReason = isopen ? calendarDay.closureJustification : null %} #}
+                            {% set isSelected = calendarDay.date|date('Y-m-d') == date|date('Y-m-d') %}
+                            
+                            <a href="{{ path('app_planning_day', {date: calendarDay.date|date('Y-m-d')}) }}" 
+                               class="day-box {{ isToday ? 'current-day' }} {{ isopen ? 'closed-day' }} {{ isSelected ? 'selected-day' }}">
+                                <div class="day-name">{{ calendarDay.day }}</div>
+                                <div class="day-number">{{ calendarDay.date|date('d') }}</div>
+                                {% if isopen %}
+                                    <div class="closure-indicator">{{ 'Crèche fermée' }}</div>
+                                {% else %}
+                                    <div class="nbr-childs">
+                                        {{ childrenCounts[calendarDay.date|date('Y-m-d')] ?? 0 }}
+                                        <i class="fas fa-child"></i>
+                                    </div>
+                                {% endif %}
+                            </a>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+
+            <a href="{{ path('app_planning_day', {date: date|date_modify('+7 days')|date('Y-m-d')}) }}" class="week-nav-button">
+                <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512">
+                    <path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/>
+                </svg>
             </a>
         </div>
+
+
+
+
+
 
         {% if presences is empty %}
             <div class="alert alert-info">
                 Aucune présence prévue pour cette journée
             </div>
         {% else %}
-            <div class="row">
+            {# <div class="row">
                 {% for presence in presences %}
                     <div class="col-md-6 col-lg-4">
                         <div class="presence-card">
@@ -172,7 +435,7 @@ th { text-align: left; }
                         </div>
                     </div>
                 {% endfor %}
-            </div>
+            </div> #}
 
             <table class="table"> 
             {# <table class="table table-striped table-bordered"> #}
@@ -183,6 +446,7 @@ th { text-align: left; }
                             <th>{{ heure }}h</th>
                             <th></th>
                         {% endfor %}
+                        <th>Présence</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -192,7 +456,7 @@ th { text-align: left; }
                         {% for heure in range(7, 19) %}
                             <td class="presence-cell 
                             {% if (presence.heureArrivee|date('H') + (presence.heureArrivee|date('i')/60)) <= heure 
-                                and (presence.heureDepart|date('H') + (presence.heureDepart|date('i')/60)) > heure %} present {% endif %} 
+                                and (presence.heureDepart|date('H') + (presence.heureDepart|date('i')/60)) > heure %} {% if presence.ispresent %} present {% else %} absent {% endif %} {% endif %} 
                             {% if (presence.heureArrivee|date('H') + (presence.heureArrivee|date('i')/60)) == heure %} first {% endif %} 
                             {% if (presence.heureDepart|date('H') + (presence.heureDepart|date('i')/60)) == heure + 0.5 %} last {% endif %} 
                             {% if heure == 7  %} first {% endif %} ">
@@ -200,13 +464,28 @@ th { text-align: left; }
                             </td>
                             <td class="presence-cell 
                             {% if (presence.heureArrivee|date('H') + (presence.heureArrivee|date('i')/60)) <= heure + 0.5 
-                                and (presence.heureDepart|date('H') + (presence.heureDepart|date('i')/60)) > heure + 0.5 %} present {% endif %} 
+                                and (presence.heureDepart|date('H') + (presence.heureDepart|date('i')/60)) > heure + 0.5 %} {% if presence.ispresent %} present {% else %} absent {% endif %} {% endif %} 
                             {% if (presence.heureArrivee|date('H') + (presence.heureArrivee|date('i')/60)) == heure + 0.5 %} first {% endif %} 
                             {% if (presence.heureDepart|date('H') + (presence.heureDepart|date('i')/60)) == heure + 1 %} last {% endif %} 
                             {% if heure == 19  %} last {% endif %} ">
                             <span class="s2h"></span>
                             </td>
                         {% endfor %}
+                        <td>
+                            <div class="switch-container">
+                                <input 
+                                    type="checkbox" 
+                                    class="switch-checkbox" 
+                                    id="switchPresence_{{ presence.id }}"
+                                    {% if presence.ispresent %}checked{% endif %}
+                                    data-csrf-token="{{ csrf_token('update-presence') }}"
+                                >
+                                <label class="switch-label" for="switchPresence_{{ presence.id }}">
+                                    <span class="switch-button"></span>
+                                    <span class="switch-text">{{ presence.ispresent ? 'Présent' : 'Absent' }}</span>
+                                </label>
+                            </div>
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -228,4 +507,80 @@ th { text-align: left; }
 
         {% endif %} #}
     </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        document.querySelectorAll('.switch-checkbox').forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                const presenceId = this.id.split('_')[1];
+                const isPresent = this.checked;
+                const token = this.dataset.csrfToken;
+
+                fetch(`/planning/update-presence/${presenceId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': token
+                    },
+                    body: JSON.stringify({ isPresent: isPresent })
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Erreur serveur');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.error) {
+                        throw new Error(data.error);
+                    }
+                    
+                    // Mettre à jour le texte du label
+                    const textSpan = this.nextElementSibling.querySelector('.switch-text');
+                    textSpan.textContent = isPresent ? 'Présent' : 'Absent';
+                    
+                    // Mettre à jour les cellules du planning
+                    const row = this.closest('tr');
+                    const presenceCells = row.querySelectorAll('.presence-cell');
+                    
+                    presenceCells.forEach(cell => {
+                        if (cell.classList.contains('present') || cell.classList.contains('absent')) {
+                            cell.classList.remove('present', 'absent');
+                            cell.classList.add(isPresent ? 'present' : 'absent');
+                        }
+                    });
+                    
+                    // Animation de confirmation
+                    const switchLabel = this.nextElementSibling;
+                    switchLabel.style.animation = 'confirm 0.3s';
+                    setTimeout(() => switchLabel.style.animation = '', 300);
+                })
+                .catch(error => {
+                    console.error('Erreur:', error);
+                    alert('Une erreur est survenue: ' + error.message);
+                    this.checked = !this.checked;
+
+                    // En cas d'erreur, remettre les classes originales
+                    const row = this.closest('tr');
+                    const presenceCells = row.querySelectorAll('.presence-cell');
+                    presenceCells.forEach(cell => {
+                        if (cell.classList.contains('present') || cell.classList.contains('absent')) {
+                            cell.classList.remove('present', 'absent');
+                            cell.classList.add(!isPresent ? 'present' : 'absent');
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+
+    <style>
+        @keyframes confirm {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+    </style>
 {% endblock %}

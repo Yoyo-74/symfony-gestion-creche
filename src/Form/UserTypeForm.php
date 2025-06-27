@@ -18,7 +18,7 @@ class UserTypeForm extends AbstractType
             ->add('nom')
             ->add('prenom')
             ->add('tel')
-            ->add('role')
+            // ->add('role')
             ->add('adress')
             ->add('cp')
             ->add('ville')

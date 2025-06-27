@@ -58,16 +58,21 @@ class UsersForm extends AbstractType
     {
         $builder
             ->add('email', EmailType::class)
-            ->add('roles', ChoiceType::class, [
-                'choices' => [
-                    'User' => 'ROLE_USER',
-                    'Admin' => 'ROLE_ADMIN',
-                    'Parent' => 'ROLE_PARENT',
-                    'Staff' => 'ROLE_STAFF'
-                ],
-                'multiple' => true,
-                'expanded' => true,
-            ])
+            // ->add('roles', ChoiceType::class, [
+            //     'choices' => [
+            //         'User' => 'ROLE_USER',
+            //         'Admin' => 'ROLE_ADMIN',
+            //         'Parent' => 'ROLE_PARENT',
+            //         'Staff' => 'ROLE_STAFF'
+            //     ],
+            //     'multiple' => true,
+            //     'expanded' => true,
+            //     'attr' => ['class' => 'roles-container'],
+            //     'label_attr' => ['class' => 'roles-label'],
+            //     'choice_attr' => function($choice, $key, $value) {
+            //         return ['class' => 'role-checkbox'];
+            //     },
+            // ])
             // ->add('password', PasswordType::class)
             ->add('plainPassword', PasswordType::class, [
                 // instead of being set onto the object directly,
@@ -89,7 +94,6 @@ class UsersForm extends AbstractType
             ->add('nom', TextType::class)
             ->add('prenom', TextType::class)
             ->add('tel', TextType::class)
-            ->add('role', TextType::class)
             ->add('adress', TextType::class)
             ->add('cp', TextType::class)
             ->add('ville', TextType::class)
@@ -100,6 +104,8 @@ class UsersForm extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => Users::class,
+            'csrf_protection' => false,
+            'allow_extra_fields' => true,
         ]);
     }
 }
