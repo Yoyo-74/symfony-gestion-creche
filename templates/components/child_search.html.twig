@@ -1,0 +1,66 @@
+{# Le composant est automatiquement mis à jour lorsque les propriétés changent #}
+<div{{ attributes }}>
+    <div class="search-container">
+        <div class="search-form">
+            <input
+                type="text"
+                name="search"
+                class="search-input"
+                placeholder="Rechercher par nom ou prénom..."
+                value="{{ search }}"
+                data-model="search"
+                data-action="live#update"
+            >
+            
+            <select 
+                name="filter" 
+                class="filter-select"
+                data-model="filter"
+                data-action="live#update"
+            >
+                <option value="all" {{ filter == 'all' ? 'selected' : '' }}>Tous les enfants</option>
+                <option value="active" {{ filter == 'active' ? 'selected' : '' }}>Enfants inscrits</option>
+            </select>
+        </div>
+    </div>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Nom</th>
+                <th>Prénom</th>
+                <th>Date de naissance</th>
+                <th>Genre</th>
+                <th>Allergies</th>
+                <th>Date d'entrée</th>
+                <th>Date de sortie</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for child in this.childs %}
+            <tr>
+                <td>{{ child.nom }}</td>
+                <td>{{ child.prenom }}</td>
+                <td>{{ child.dateNaissance ? child.dateNaissance|date('d/m/Y') : '' }}</td>
+                <td>{{ child.genre }}</td>
+                <td>{{ child.allergies }}</td>
+                <td>{{ child.dateEntree ? child.dateEntree|date('d/m/Y') : '' }}</td>
+                <td>{{ child.dateSortie ? child.dateSortie|date('d/m/Y') : '' }}</td>
+                <td>
+                    <a href="{{ path('app_childs_show', {'id': child.id}) }}" class="btn btn-info btn-sm">
+                        <i class="fas fa-eye"></i>
+                    </a>
+                    <a href="{{ path('app_childs_edit', {'id': child.id}) }}" class="btn btn-primary btn-sm">
+                        <i class="fas fa-edit"></i>
+                    </a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="8" class="text-center">Aucun enfant trouvé</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div> 

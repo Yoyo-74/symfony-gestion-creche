@@ -18,14 +18,20 @@
                     <i class="fas fa-chart-line"></i> Dashboard Admin
                 </a>
             {% endif %}
-            <a href="{{ path('app_daily_planning') }}" class="navbar-item">
+            {# <a href="{{ path('app_daily_planning') }}" class="navbar-item">
+                <i class="fas fa-calendar-day"></i> Planning du jour
+            </a> #}
+            <a href="{{ path('app_planning_day') }}" class="navbar-item">
                 <i class="fas fa-calendar-day"></i> Planning du jour
             </a>
-            <a href="{{ path('app_childs_new') }}" class="navbar-item">
+            <a href="{{ path('app_inscription') }}" class="navbar-item">
                 <i class="fas fa-child"></i> Inscription
             </a>
             <a href="{{ path('app_users_index') }}" class="navbar-item">
-                <i class="fas fa-utensils"></i> Repas
+                <i class="fas fa-user"></i> Utilisateurs
+            </a>
+            <a href="{{ path('app_childs_index') }}" class="navbar-item">
+                <i class="fas fa-baby"></i> Enfants
             </a>
         </div>
         

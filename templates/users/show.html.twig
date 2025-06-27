@@ -1,62 +1,318 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Users{% endblock %}
+{% block title %}{{ user.prenom }} {{ user.nom }}{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .info-section {
+            margin: 2rem 0;
+            padding: 1rem;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .info-header {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .user-info {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+
+        .user-info table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .user-info th {
+            text-align: left;
+            padding: 0.5rem;
+            color: #7f8c8d;
+            width: 200px;
+        }
+
+        .user-info td {
+            padding: 0.5rem;
+        }
+
+        .children-list {
+            margin-top: 1rem;
+        }
+
+        .child-card {
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .child-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #eee;
+        }
+
+        .child-name {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .child-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 0.5rem;
+        }
+
+        .child-detail-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .detail-label {
+            font-size: 0.9rem;
+            color: #7f8c8d;
+            margin-bottom: 0.2rem;
+        }
+
+        .detail-value {
+            font-weight: 500;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .btn-primary {
+            background-color: #3498db;
+            color: white;
+        }
+
+        .btn-secondary {
+            background-color: #95a5a6;
+            color: white;
+        }
+
+        .action-buttons {
+            margin-top: 2rem;
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-start;
+            align-items: center;
+        }
+
+        .schedule-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+
+        .schedule-table th,
+        .schedule-table td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+
+        .schedule-table th {
+            background-color: #f8f9fa;
+        }
+
+        .responsables-list {
+            margin-top: 1rem;
+        }
+
+        .responsable-card {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+
+        .responsable-header {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+        }
+
+        .responsable-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+    </style>
+{% endblock %}
 
 {% block body %}
-    <h1>Users</h1>
+    <div class="container">
+        <h1 class="info-header">{{ user.prenom }} {{ user.nom }}</h1>
 
-    <table class="table">
-        <tbody>
-            <tr>
-                <th>Id</th>
-                <td>{{ user.id }}</td>
-            </tr>
-            <tr>
-                <th>Email</th>
-                <td>{{ user.email }}</td>
-            </tr>
-            <tr>
-                <th>Roles</th>
-                <td>{{ user.roles ? user.roles|json_encode : '' }}</td>
-            </tr>
-            <tr>
-                <th>Password</th>
-                <td>{{ user.password }}</td>
-            </tr>
-            <tr>
-                <th>Nom</th>
-                <td>{{ user.nom }}</td>
-            </tr>
-            <tr>
-                <th>Prenom</th>
-                <td>{{ user.prenom }}</td>
-            </tr>
-            <tr>
-                <th>Tel</th>
-                <td>{{ user.tel }}</td>
-            </tr>
-            <tr>
-                <th>Role</th>
-                <td>{{ user.role }}</td>
-            </tr>
-            <tr>
-                <th>Adress</th>
-                <td>{{ user.adress }}</td>
-            </tr>
-            <tr>
-                <th>Cp</th>
-                <td>{{ user.cp }}</td>
-            </tr>
-            <tr>
-                <th>Ville</th>
-                <td>{{ user.ville }}</td>
-            </tr>
-        </tbody>
-    </table>
+        <div class="info-section">
+            <h2 class="info-header">Informations personnelles</h2>
+            <div class="user-info">
+                <table>
+                    <tr>
+                        <th>Email</th>
+                        <td>{{ user.email }}</td>
+                    </tr>
+                    <tr>
+                        <th>Téléphone</th>
+                        <td>{{ user.tel }}</td>
+                    </tr>
+                    <tr>
+                        <th>Adresse</th>
+                        <td>{{ user.adress }}</td>
+                    </tr>
+                    <tr>
+                        <th>Code postal</th>
+                        <td>{{ user.cp }}</td>
+                    </tr>
+                    <tr>
+                        <th>Ville</th>
+                        <td>{{ user.ville }}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
 
-    <a href="{{ path('app_users_index') }}">back to list</a>
+        <div class="info-section">
+            <h2 class="info-header">Enfants rattachés</h2>
+            <div class="children-list">
+                {% if user.usersChilds|length > 0 %}
+                    {% for userChild in user.usersChilds %}
+                        <div class="child-card">
+                            <div class="child-header">
+                                <span class="child-name">
+                                    {{ userChild.child.prenom }} {{ userChild.child.nom }}
+                                </span>
+                            </div>
+                            <div class="child-details">
+                                <div class="child-detail-item">
+                                    <span class="detail-label">Date de naissance</span>
+                                    <span class="detail-value">
+                                        {{ userChild.child.dateNaissance|date('d/m/Y') }}
+                                    </span>
+                                </div>
+                                <div class="child-detail-item">
+                                    <span class="detail-label">Genre</span>
+                                    <span class="detail-value">{{ userChild.child.genre }}</span>
+                                </div>
+                                {% if userChild.child.allergies %}
+                                    <div class="child-detail-item">
+                                        <span class="detail-label">Allergies</span>
+                                        <span class="detail-value">{{ userChild.child.allergies }}</span>
+                                    </div>
+                                {% endif %}
+                                <div class="child-detail-item">
+                                    <span class="detail-label">Période d'accueil</span>
+                                    <span class="detail-value">
+                                        Du {{ userChild.child.dateEntree|date('d/m/Y') }}
+                                        au {{ userChild.child.dateSortie|date('d/m/Y') }}
+                                    </span>
+                                </div>
+                            </div>
 
-    <a href="{{ path('app_users_edit', {'id': user.id}) }}">edit</a>
+                            {# Planning hebdomadaire #}
+                            <h3 class="info-header" style="margin-top: 1rem;">Planning hebdomadaire</h3>
+                            <table class="schedule-table">
+                                <thead>
+                                    <tr>
+                                        <th>Jour</th>
+                                        <th>Heure d'arrivée</th>
+                                        <th>Heure de départ</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Lundi</td>
+                                        <td>{{ userChild.child.lundiA ? userChild.child.lundiA|date('H:i') : '-' }}</td>
+                                        <td>{{ userChild.child.lundiD ? userChild.child.lundiD|date('H:i') : '-' }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Mardi</td>
+                                        <td>{{ userChild.child.mardiA ? userChild.child.mardiA|date('H:i') : '-' }}</td>
+                                        <td>{{ userChild.child.mardiD ? userChild.child.mardiD|date('H:i') : '-' }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Mercredi</td>
+                                        <td>{{ userChild.child.mercrediA ? userChild.child.mercrediA|date('H:i') : '-' }}</td>
+                                        <td>{{ userChild.child.mercrediD ? userChild.child.mercrediD|date('H:i') : '-' }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Jeudi</td>
+                                        <td>{{ userChild.child.jeudiA ? userChild.child.jeudiA|date('H:i') : '-' }}</td>
+                                        <td>{{ userChild.child.jeudiD ? userChild.child.jeudiD|date('H:i') : '-' }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Vendredi</td>
+                                        <td>{{ userChild.child.vendrediA ? userChild.child.vendrediA|date('H:i') : '-' }}</td>
+                                        <td>{{ userChild.child.vendrediD ? userChild.child.vendrediD|date('H:i') : '-' }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
 
-    {{ include('users/_delete_form.html.twig') }}
+                            {# Responsables #}
+                            <h3 class="info-header" style="margin-top: 1rem;">Responsables</h3>
+                            <div class="responsables-list">
+                                {% for responsableChild in userChild.child.responsablesChilds %}
+                                    <div class="responsable-card">
+                                        <div class="responsable-header">
+                                            {{ responsableChild.responsable.prenom }} {{ responsableChild.responsable.nom }}
+                                            ({{ responsableChild.lien }})
+                                        </div>
+                                        <div class="responsable-info">
+                                            {% if responsableChild.responsable.email %}
+                                                <div>
+                                                    <span class="detail-label">Email</span>
+                                                    <span class="detail-value">{{ responsableChild.responsable.email }}</span>
+                                                </div>
+                                            {% endif %}
+                                            {% if responsableChild.responsable.tel %}
+                                                <div>
+                                                    <span class="detail-label">Téléphone</span>
+                                                    <span class="detail-value">{{ responsableChild.responsable.tel }}</span>
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p>Aucun enfant rattaché à cet utilisateur.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="action-buttons">
+            <a href="{{ path('app_users_index') }}" class="btn btn-secondary">Retour à la liste</a>
+            <a href="{{ path('app_users_edit', {'id': user.id}) }}" class="btn btn-primary">Modifier</a>
+        </div>
+    </div>
 {% endblock %}

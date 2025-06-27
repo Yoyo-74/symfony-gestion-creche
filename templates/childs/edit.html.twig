@@ -1,0 +1,459 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Modifier {{ child.prenom }} {{ child.nom }}{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .info-section {
+            margin: 2rem 0;
+            padding: 1rem;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .info-card {
+            background: #f8f9fa;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 1rem;
+        }
+
+        .info-header {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #7f8c8d;
+            font-weight: bold;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        .time-input select {
+            width: auto;
+            margin-right: 0.5rem;
+        }
+
+        .action-buttons {
+            margin-top: 2rem;
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-start;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .btn-primary {
+            background-color: #3498db;
+            color: white;
+        }
+
+        .btn-secondary {
+            background-color: #95a5a6;
+            color: white;
+        }
+
+        .btn-danger {
+            background-color: #e74c3c;
+            color: white;
+        }
+
+        .responsable-list {
+            margin-top: 1rem;
+        }
+
+        .responsable-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem;
+            background: #fff;
+            border: 1px solid #ddd;
+            margin-bottom: 0.5rem;
+            border-radius: 4px;
+        }
+
+        .add-responsable-btn {
+            margin-top: 1rem;
+            background-color: #2ecc71;
+            color: white;
+        }
+
+        /* Styles pour le formulaire d'ajout de responsable */
+        #newResponsableFormContainer {
+            display: none;
+            margin: 2rem 0;
+            padding: 1rem;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        #newResponsableFormContainer h2 {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        #newResponsableForm {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1rem;
+        }
+
+        .form-buttons {
+            grid-column: 1 / -1;
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .error-message {
+            color: #dc3545;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+            grid-column: 1 / -1;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+    <div class="container">
+        <h1 class="info-header">Modifier {{ child.prenom }} {{ child.nom }}</h1>
+
+        {{ form_start(form) }}
+            <div class="info-section">
+                <h2 class="info-header">Informations personnelles</h2>
+                <div class="info-grid">
+                    <div class="info-card">
+                        <div class="form-group">
+                            {{ form_label(form.nom) }}
+                            {{ form_widget(form.nom, {'attr': {'class': 'form-control'}}) }}
+                        </div>
+                        <div class="form-group">
+                            {{ form_label(form.prenom) }}
+                            {{ form_widget(form.prenom, {'attr': {'class': 'form-control'}}) }}
+                        </div>
+                        <div class="form-group">
+                            {{ form_label(form.date_naissance) }}
+                            {{ form_widget(form.date_naissance, {'attr': {'class': 'form-control'}}) }}
+                        </div>
+                        <div class="form-group">
+                            {{ form_label(form.genre) }}
+                            {{ form_widget(form.genre) }}
+                        </div>
+                    </div>
+
+                    <div class="info-card">
+                        <div class="form-group">
+                            {{ form_label(form.allergies) }}
+                            {{ form_widget(form.allergies, {'attr': {'class': 'form-control'}}) }}
+                        </div>
+                        <div class="form-group">
+                            {{ form_label(form.remarques_medicales) }}
+                            {{ form_widget(form.remarques_medicales, {'attr': {'class': 'form-control'}}) }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-section">
+                <h2 class="info-header">Informations administratives</h2>
+                <div class="info-grid">
+                    <div class="info-card">
+                        <div class="form-group">
+                            {{ form_label(form.revenus) }}
+                            {{ form_widget(form.revenus, {'attr': {'class': 'form-control'}}) }}
+                        </div>
+                        <div class="form-group">
+                            {{ form_label(form.date_entree) }}
+                            {{ form_widget(form.date_entree, {'attr': {'class': 'form-control'}}) }}
+                        </div>
+                        <div class="form-group">
+                            {{ form_label(form.date_sortie) }}
+                            {{ form_widget(form.date_sortie, {'attr': {'class': 'form-control'}}) }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-section">
+                <h2 class="info-header">Horaires</h2>
+                <div class="info-grid">
+                    <div class="info-card">
+                        <h3>Période</h3>
+                        <div class="form-group">
+                            {{ form_row(form.date_debut) }}
+                            {{ form_row(form.date_fin) }}
+                        </div>
+                    </div>
+                    <div class="info-card">
+                        <h3>Lundi</h3>
+                        <div class="form-group">
+                            {{ form_row(form.lundi_a) }}
+                            {{ form_row(form.lundi_d) }}
+                        </div>
+                    </div>
+                    <div class="info-card">
+                        <h3>Mardi</h3>
+                        <div class="form-group">
+                            {{ form_row(form.mardi_a) }}
+                            {{ form_row(form.mardi_d) }}
+                        </div>
+                    </div>
+                    <div class="info-card">
+                        <h3>Mercredi</h3>
+                        <div class="form-group">
+                            {{ form_row(form.mercredi_a) }}
+                            {{ form_row(form.mercredi_d) }}
+                        </div>
+                    </div>
+                    <div class="info-card">
+                        <h3>Jeudi</h3>
+                        <div class="form-group">
+                            {{ form_row(form.jeudi_a) }}
+                            {{ form_row(form.jeudi_d) }}
+                        </div>
+                    </div>
+                    <div class="info-card">
+                        <h3>Vendredi</h3>
+                        <div class="form-group">
+                            {{ form_row(form.vendredi_a) }}
+                            {{ form_row(form.vendredi_d) }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-section">
+                <h2 class="info-header">Responsables associés</h2>
+                <div class="responsable-list">
+                    {% if child.responsablesChilds is not empty %}
+                        {% for respChild in child.responsablesChilds %}
+                            <div class="responsable-item">
+                                <div>
+                                    {{ respChild.responsable.prenom }} {{ respChild.responsable.nom }}
+                                    ({{ respChild.responsable.tel }}) Lien : {{ respChild.lien }}
+                                </div>
+                                <button type="button" class="btn btn-danger btn-sm remove-responsable" 
+                                        data-id="{{ respChild.responsable.id }}">
+                                    Supprimer
+                                </button>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <p>Aucun responsable associé</p>
+                    {% endif %}
+                    <button type="button" class="btn add-responsable-btn" id="showResponsableForm">
+                        Ajouter un responsable
+                    </button>
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <button type="submit" class="btn btn-primary">Enregistrer les modifications</button>
+                <a href="{{ path('app_childs_index') }}" class="btn btn-secondary">Retour à la liste</a>
+                {{ include('childs/_delete_form.html.twig') }}
+            </div>
+        {{ form_end(form) }}
+
+        {# Formulaire d'ajout de responsable - DÉPLACÉ EN DEHORS DU FORMULAIRE PRINCIPAL #}
+        <div id="newResponsableFormContainer" style="display: none;" class="info-section">
+            <h2>Ajouter un responsable</h2>
+            <form id="newResponsableForm">
+                <div class="form-group">
+                    <label for="nom">Nom</label>
+                    <input type="text" id="nom" name="nom" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="prenom">Prénom</label>
+                    <input type="text" id="prenom" name="prenom" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="tel">Téléphone</label>
+                    <input type="tel" id="tel" name="tel" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="lien">Lien avec l'enfant</label>
+                    <select id="lien" name="lien" class="form-control" required>
+                        <option value="">Sélectionnez un lien</option>
+                        <option value="Père">Père</option>
+                        <option value="Mère">Mère</option>
+                        <option value="Tuteur légal">Tuteur légal</option>
+                        <option value="Grand-Parent">Grand-Parent</option>
+                        <option value="Famille">Famille</option>
+                        <option value="Autre">Autre</option>
+                    </select>
+                </div>
+                <div class="form-buttons">
+                    <button type="button" class="btn btn-secondary" id="cancelResponsableForm">Annuler</button>
+                    <button type="button" class="btn btn-primary" id="saveNewResponsable">Enregistrer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        // Attendre que le DOM soit chargé
+        window.addEventListener('load', function() {
+            alert('Le JavaScript est chargé !');
+            
+            // Sélectionner les éléments
+            const showFormButton = document.getElementById('showResponsableForm');
+            const formContainer = document.getElementById('newResponsableFormContainer');
+            const cancelButton = document.getElementById('cancelResponsableForm');
+            const form = document.getElementById('newResponsableForm');
+            const saveButton = document.getElementById('saveNewResponsable');
+
+            // Vérifier si les éléments existent
+            if (!showFormButton) {
+                console.error('Le bouton showFormButton est introuvable');
+                return;
+            }
+            if (!formContainer) {
+                console.error('Le conteneur formContainer est introuvable');
+                return;
+            }
+            if (!cancelButton) {
+                console.error('Le bouton cancelButton est introuvable');
+                return;
+            }
+            if (!form) {
+                console.error('Le formulaire est introuvable');
+                return;
+            }
+            if (!saveButton) {
+                console.error('Le bouton saveButton est introuvable');
+                return;
+            }
+
+            // Afficher le formulaire
+            showFormButton.onclick = function() {
+                alert('Bouton cliqué !');
+                formContainer.style.display = 'block';
+                showFormButton.style.display = 'none';
+            };
+
+            // Cacher le formulaire
+            cancelButton.onclick = function() {
+                formContainer.style.display = 'none';
+                showFormButton.style.display = 'block';
+                form.reset();
+            };
+
+            // Gérer la soumission du formulaire
+            saveButton.onclick = async function() {
+                // Vérifier la validité du formulaire
+                if (!form.checkValidity()) {
+                    form.reportValidity();
+                    return;
+                }
+
+                const formData = {
+                    nom: document.getElementById('nom').value.trim(),
+                    prenom: document.getElementById('prenom').value.trim(),
+                    email: document.getElementById('email').value.trim(),
+                    tel: document.getElementById('tel').value.trim(),
+                    lien: document.getElementById('lien').value
+                };
+
+                try {
+                    const response = await fetch(`{{ path('app_childs_add_new_responsable', {'id': child.id}) }}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        body: JSON.stringify(formData)
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        // Créer le nouvel élément
+                        const newResponsable = document.createElement('div');
+                        newResponsable.className = 'responsable-item';
+                        newResponsable.innerHTML = `
+                            <div>
+                                ${data.responsable.prenom} ${data.responsable.nom}
+                                (${data.responsable.tel}) Lien : ${data.responsable.lien}
+                            </div>
+                            <button type="button" class="btn btn-danger btn-sm remove-responsable" 
+                                    data-id="${data.responsable.id}">
+                                Supprimer
+                            </button>
+                        `;
+
+                        // Ajouter à la liste
+                        const responsablesList = document.querySelector('.responsable-list');
+                        const noResponsableMessage = responsablesList.querySelector('p');
+                        if (noResponsableMessage) {
+                            noResponsableMessage.remove();
+                        }
+                        responsablesList.insertBefore(newResponsable, showFormButton);
+
+                        // Réinitialiser le formulaire
+                        formContainer.style.display = 'none';
+                        showFormButton.style.display = 'block';
+                        form.reset();
+
+                        // Message de succès
+                        alert('Le responsable a été ajouté avec succès !');
+                    } else {
+                        throw new Error(data.message || 'Erreur lors de l\'ajout du responsable');
+                    }
+                } catch (error) {
+                    alert('Erreur : ' + error.message);
+                }
+            };
+        });
+    </script>
+{% endblock %}

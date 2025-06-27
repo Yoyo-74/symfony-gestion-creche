@@ -1,0 +1,79 @@
+{# Le composant est automatiquement mis à jour lorsque les propriétés changent #}
+<div{{ attributes }}>
+    <div class="search-container">
+        <div class="search-form">
+            <input
+                type="text"
+                name="search"
+                class="search-input"
+                placeholder="Rechercher par nom ou prénom..."
+                value="{{ search }}"
+                data-model="search"
+                data-action="live#update"
+            >
+            
+            <select 
+                name="roleFilter" 
+                class="filter-select"
+                data-model="roleFilter"
+                data-action="live#update"
+            >
+                {% for role, label in this.availableRoles %}
+                    <option value="{{ role }}" {{ roleFilter == role ? 'selected' : '' }}>
+                        {{ label }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Nom</th>
+                <th>Prénom</th>
+                <th>Email</th>
+                <th>Téléphone</th>
+                <th>Rôle</th>
+                <th>Adresse</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for user in this.users %}
+            <tr>
+                <td>{{ user.nom }}</td>
+                <td>{{ user.prenom }}</td>
+                <td>{{ user.email }}</td>
+                <td>{{ user.tel }}</td>
+                <td>
+                    {% for role in user.roles %}
+                        {% if role != 'ROLE_USER' %}
+                            <span class="badge bg-{{ role == 'ROLE_ADMIN' ? 'danger' : (role == 'ROLE_STAFF' ? 'primary' : 'success') }}">
+                                {{ this.availableRoles[role] }}
+                            </span>
+                        {% endif %}
+                    {% endfor %}
+                </td>
+                <td>
+                    {% if user.adress %}
+                        {{ user.adress }}, {{ user.cp }} {{ user.ville }}
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="{{ path('app_users_show', {'id': user.id}) }}" class="btn btn-info btn-sm">
+                        <i class="fas fa-eye"></i>
+                    </a>
+                    <a href="{{ path('app_users_edit', {'id': user.id}) }}" class="btn btn-primary btn-sm">
+                        <i class="fas fa-edit"></i>
+                    </a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="7" class="text-center">Aucun utilisateur trouvé</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div> 

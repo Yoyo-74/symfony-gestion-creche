@@ -1,13 +1,594 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Edit Users{% endblock %}
+{% block title %}Modifier {{ user.prenom }} {{ user.nom }}{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .info-section {
+            margin: 2rem 0;
+            padding: 1rem;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .info-header {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #7f8c8d;
+            font-weight: bold;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        .children-list {
+            margin-top: 1rem;
+        }
+
+        .child-card {
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .child-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #eee;
+        }
+
+        .child-name {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .child-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 0.5rem;
+        }
+
+        .child-detail-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .detail-label {
+            font-size: 0.9rem;
+            color: #7f8c8d;
+            margin-bottom: 0.2rem;
+        }
+
+        .detail-value {
+            font-weight: 500;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .btn-primary {
+            background-color: #3498db;
+            color: white;
+        }
+
+        .btn-secondary {
+            background-color: #95a5a6;
+            color: white;
+        }
+
+        .btn-danger {
+            background-color: #e74c3c;
+            color: white;
+        }
+
+        .btn-success {
+            background-color: #2ecc71;
+            color: white;
+        }
+
+        .action-buttons {
+            margin-top: 2rem;
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-start;
+            align-items: center;
+        }
+
+        .schedule-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+
+        .schedule-table th,
+        .schedule-table td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+
+        .schedule-table th {
+            background-color: #f8f9fa;
+        }
+
+        .time-input select {
+            width: auto;
+            margin-right: 0.5rem;
+        }
+
+        #newChildFormContainer {
+            display: none;
+        }
+
+        .responsable-form {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            position: relative;
+        }
+
+        .remove-responsable-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            color: #dc3545;
+            background: none;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+        }
+
+        .responsables-container {
+            position: relative;
+        }
+
+        .add-responsable-btn {
+            margin-top: 1rem;
+            background-color: #2ecc71;
+            color: white;
+        }
+    </style>
+{% endblock %}
 
 {% block body %}
-    <h1>Edit Users</h1>
+    <div class="container">
+        <h1 class="info-header">Modifier {{ user.prenom }} {{ user.nom }}</h1>
 
-    {{ include('users/_form.html.twig', {'button_label': 'Update'}) }}
+        <div class="info-section">
+            <h2 class="info-header">Informations personnelles</h2>
+            {{ form_start(form) }}
+                <div class="form-group">
+                    {{ form_label(form.email) }}
+                    {{ form_widget(form.email, {'attr': {'class': 'form-control'}}) }}
+                </div>
+                <div class="form-group">
+                    {{ form_label(form.nom) }}
+                    {{ form_widget(form.nom, {'attr': {'class': 'form-control'}}) }}
+                </div>
+                <div class="form-group">
+                    {{ form_label(form.prenom) }}
+                    {{ form_widget(form.prenom, {'attr': {'class': 'form-control'}}) }}
+                </div>
+                <div class="form-group">
+                    {{ form_label(form.tel) }}
+                    {{ form_widget(form.tel, {'attr': {'class': 'form-control'}}) }}
+                </div>
+                <div class="form-group">
+                    {{ form_label(form.adress) }}
+                    {{ form_widget(form.adress, {'attr': {'class': 'form-control'}}) }}
+                </div>
+                <div class="form-group">
+                    {{ form_label(form.cp) }}
+                    {{ form_widget(form.cp, {'attr': {'class': 'form-control'}}) }}
+                </div>
+                <div class="form-group">
+                    {{ form_label(form.ville) }}
+                    {{ form_widget(form.ville, {'attr': {'class': 'form-control'}}) }}
+                </div>
+            {{ form_end(form) }}
+        </div>
 
-    <a href="{{ path('app_users_index') }}">back to list</a>
+        <div class="info-section">
+            <h2 class="info-header">Enfants rattachés</h2>
+            <div class="children-list">
+                {% if user.usersChilds|length > 0 %}
+                    {% for userChild in user.usersChilds %}
+                        <div class="child-card">
+                            <div class="child-header">
+                                <span class="child-name">
+                                    {{ userChild.child.prenom }} {{ userChild.child.nom }}
+                                </span>
+                                <div>
+                                    <a href="{{ path('app_childs_edit', {'id': userChild.child.id}) }}" class="btn btn-primary">Modifier</a>
+                                    <button type="button" class="btn btn-danger remove-child" data-id="{{ userChild.child.id }}">
+                                        Supprimer
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="child-details">
+                                <div class="child-detail-item">
+                                    <span class="detail-label">Date de naissance</span>
+                                    <span class="detail-value">
+                                        {{ userChild.child.dateNaissance|date('d/m/Y') }}
+                                    </span>
+                                </div>
+                                <div class="child-detail-item">
+                                    <span class="detail-label">Genre</span>
+                                    <span class="detail-value">{{ userChild.child.genre }}</span>
+                                </div>
+                                {% if userChild.child.allergies %}
+                                    <div class="child-detail-item">
+                                        <span class="detail-label">Allergies</span>
+                                        <span class="detail-value">{{ userChild.child.allergies }}</span>
+                                    </div>
+                                {% endif %}
+                                <div class="child-detail-item">
+                                    <span class="detail-label">Période d'accueil</span>
+                                    <span class="detail-value">
+                                        Du {{ userChild.child.dateEntree|date('d/m/Y') }}
+                                        au {{ userChild.child.dateSortie|date('d/m/Y') }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p>Aucun enfant rattaché à cet utilisateur.</p>
+                {% endif %}
 
-    {{ include('users/_delete_form.html.twig') }}
+                <button type="button" class="btn btn-success" id="showChildForm">
+                    Ajouter un enfant
+                </button>
+            </div>
+        </div>
+
+        {# Formulaire d'ajout d'enfant #}
+        <div id="newChildFormContainer" class="info-section">
+            <h2 class="info-header">Ajouter un enfant</h2>
+            <form id="newChildForm" method="post">
+                <input type="hidden" name="token" value="{{ csrf_token('add_child') }}">
+                <div class="form-group">
+                    <label for="nom">Nom</label>
+                    <input type="text" id="nom" name="nom" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="prenom">Prénom</label>
+                    <input type="text" id="prenom" name="prenom" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="date_naissance">Date de naissance</label>
+                    <input type="date" id="date_naissance" name="date_naissance" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>Genre</label>
+                    <div>
+                        <label>
+                            <input type="radio" name="genre" value="F" required> Fille
+                        </label>
+                        <label>
+                            <input type="radio" name="genre" value="G" required> Garçon
+                        </label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="allergies">Allergies</label>
+                    <textarea id="allergies" name="allergies" class="form-control"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="remarques_medicales">Remarques médicales</label>
+                    <textarea id="remarques_medicales" name="remarques_medicales" class="form-control"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="revenus">Revenus mensuels du foyer</label>
+                    <input type="number" id="revenus" name="revenus" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label for="date_entree">Date d'entrée</label>
+                    <input type="date" id="date_entree" name="date_entree" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="date_sortie">Date de sortie</label>
+                    <input type="date" id="date_sortie" name="date_sortie" class="form-control">
+                </div>
+
+                {{ form_start(scheduleForm, {'attr': {'id': 'scheduleForm'}}) }}
+                <div class="form-group">
+                    <label>Période de planning</label>
+                    <div style="display: flex; gap: 1rem;">
+                        {{ form_widget(scheduleForm.date_debut, {'attr': {'class': 'form-control'}}) }}
+                        {{ form_widget(scheduleForm.date_fin, {'attr': {'class': 'form-control'}}) }}
+                    </div>
+                </div>
+                <table class="schedule-table">
+                    <thead>
+                        <tr>
+                            <th>Jour</th>
+                            <th>Heure d'arrivée</th>
+                            <th>Heure de départ</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for day in ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi'] %}
+                            <tr>
+                                <td>{{ day|capitalize }}</td>
+                                <td>{{ form_widget(scheduleForm[day ~ '_a']) }}</td>
+                                <td>{{ form_widget(scheduleForm[day ~ '_d']) }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {{ form_end(scheduleForm) }}
+
+                <div class="info-section">
+                    <h3 class="info-header">Responsables</h3>
+                    <div class="responsables-container" data-prototype="{{ include('childs/_add_responsable_form.html.twig', {'name': '__name__'})|e('html_attr') }}">
+                        <div class="responsables-list"></div>
+                        <button type="button" class="btn add-responsable-btn">Ajouter un responsable</button>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button type="button" class="btn btn-secondary" id="cancelChildForm">Annuler</button>
+                    <button type="submit" class="btn btn-primary" id="submitChildForm">Enregistrer</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="action-buttons">
+            <a href="{{ path('app_users_index') }}" class="btn btn-secondary">Retour à la liste</a>
+            {{ include('users/_delete_form.html.twig') }}
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOMContentLoaded déclenché');
+            setupForm();
+            setupResponsablesForm();
+        });
+
+        document.addEventListener('turbo:load', function() {
+            console.log('turbo:load déclenché');
+            setupForm();
+            setupResponsablesForm();
+        });
+
+        function setupResponsablesForm() {
+            const container = document.querySelector('.responsables-container');
+            if (!container) {
+                console.error('Container des responsables non trouvé');
+                return;
+            }
+
+            const addButton = container.querySelector('.add-responsable-btn');
+            const list = container.querySelector('.responsables-list');
+            let index = list.children.length;
+
+            addButton.addEventListener('click', function() {
+                console.log('Ajout d\'un nouveau responsable');
+                const prototype = container.dataset.prototype;
+                const newForm = prototype.replace(/__name__/g, index);
+                const div = document.createElement('div');
+                div.innerHTML = newForm;
+                div.classList.add('responsable-form');
+                
+                // Ajout du bouton de suppression
+                const removeButton = document.createElement('button');
+                removeButton.type = 'button';
+                removeButton.className = 'remove-responsable-btn';
+                removeButton.innerHTML = '×';
+                removeButton.onclick = function() {
+                    div.remove();
+                };
+                div.appendChild(removeButton);
+                
+                list.appendChild(div);
+                index++;
+            });
+        }
+
+        function setupForm() {
+            console.log('Configuration du formulaire...');
+            
+            // Récupération des éléments du DOM
+            const childForm = document.getElementById('newChildForm');
+            const submitButton = document.getElementById('submitChildForm');
+            const showFormButton = document.getElementById('showChildForm');
+            const formContainer = document.getElementById('newChildFormContainer');
+            const cancelButton = document.getElementById('cancelChildForm');
+
+            // Vérification de l'existence des éléments
+            if (!childForm) {
+                console.error('Le formulaire newChildForm est introuvable');
+                return;
+            }
+            if (!submitButton) {
+                console.error('Le bouton submitChildForm est introuvable');
+                return;
+            }
+            if (!showFormButton) {
+                console.error('Le bouton showChildForm est introuvable');
+                return;
+            }
+            if (!formContainer) {
+                console.error('Le conteneur newChildFormContainer est introuvable');
+                return;
+            }
+            if (!cancelButton) {
+                console.error('Le bouton cancelChildForm est introuvable');
+                return;
+            }
+
+            console.log('Tous les éléments du formulaire sont présents');
+
+            // Gestion de l'affichage du formulaire
+            showFormButton.onclick = function() {
+                console.log('Affichage du formulaire');
+                formContainer.style.display = 'block';
+                showFormButton.style.display = 'none';
+            };
+
+            // Gestion de l'annulation
+            cancelButton.onclick = function() {
+                console.log('Annulation du formulaire');
+                formContainer.style.display = 'none';
+                showFormButton.style.display = 'block';
+                childForm.reset();
+            };
+
+            // Gestion de la soumission du formulaire
+            submitButton.onclick = async function(e) {
+                e.preventDefault();
+                console.log('Clic sur le bouton Enregistrer');
+                await handleFormSubmission(childForm, submitButton);
+            };
+
+            childForm.onsubmit = async function(e) {
+                e.preventDefault();
+                console.log('Soumission du formulaire détectée');
+                await handleFormSubmission(childForm, submitButton);
+            };
+        }
+
+        async function handleFormSubmission(form, submitButton) {
+            console.log('Début de la soumission du formulaire');
+            
+            // Désactiver le bouton
+            submitButton.disabled = true;
+            submitButton.textContent = 'Envoi en cours...';
+
+            try {
+                const formData = new FormData(form);
+                
+                // Ajouter les données du formulaire d'horaires
+                const scheduleForm = document.getElementById('scheduleForm');
+                if (scheduleForm) {
+                    console.log('Ajout des données du planning');
+                    const scheduleInputs = scheduleForm.querySelectorAll('select, input');
+                    scheduleInputs.forEach(input => {
+                        if (input.name) {
+                            // Pour les horaires, on crée une chaîne de caractères au format HH:MM
+                            if (input.name.endsWith('_a') || input.name.endsWith('_d')) {
+                                const timeInputs = input.parentElement.querySelectorAll('select');
+                                const hours = timeInputs[0].value.padStart(2, '0');
+                                const minutes = timeInputs[1].value.padStart(2, '0');
+                                const timeString = `${hours}:${minutes}`;
+                                console.log(`Ajout de ${input.name}: ${timeString}`);
+                                formData.append(input.name, timeString);
+                            } else {
+                                console.log(`Ajout de ${input.name}: ${input.value}`);
+                                formData.append(input.name, input.value);
+                            }
+                        }
+                    });
+                }
+
+                // Ajouter les données des responsables
+                const responsablesForms = document.querySelectorAll('.responsable-form');
+                responsablesForms.forEach((form, index) => {
+                    const inputs = form.querySelectorAll('input, select');
+                    inputs.forEach(input => {
+                        if (input.name) {
+                            const name = input.name.replace('__name__', index);
+                            formData.append(name, input.value);
+                        }
+                    });
+                });
+
+                // Log des données envoyées
+                console.log('Données du formulaire :');
+                for (let [key, value] of formData.entries()) {
+                    console.log(`${key}: ${value}`);
+                }
+
+                const url = `{{ path('app_users_add_child', {'id': user.id}) }}`;
+                console.log(`Envoi de la requête à ${url}`);
+
+                const response = await fetch(url, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+
+                console.log('Réponse reçue du serveur');
+                const data = await response.json();
+                console.log('Données reçues:', data);
+
+                if (data.success) {
+                    showMessage('success', data.message || 'Enfant ajouté avec succès');
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 2000);
+                } else {
+                    throw new Error(data.message || 'Une erreur est survenue');
+                }
+            } catch (error) {
+                console.error('Erreur lors de la soumission:', error);
+                showMessage('error', error.message || 'Une erreur est survenue lors de la soumission');
+            } finally {
+                // Réactiver le bouton
+                submitButton.disabled = false;
+                submitButton.textContent = 'Enregistrer';
+            }
+        }
+
+        function showMessage(type, message) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type === 'success' ? 'success' : 'danger'}`;
+            alertDiv.textContent = message;
+            
+            const form = document.getElementById('newChildForm');
+            if (form) {
+                form.insertBefore(alertDiv, form.firstChild);
+                
+                if (type === 'error') {
+                    setTimeout(() => alertDiv.remove(), 5000);
+                }
+            }
+        }
+    </script>
 {% endblock %}

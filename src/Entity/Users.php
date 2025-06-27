@@ -44,9 +44,6 @@ class Users implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 255)]
     private ?string $tel = null;
 
-    #[ORM\Column(length: 255)]
-    private ?string $role = null;
-
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $adress = null;
 
@@ -172,18 +169,6 @@ class Users implements UserInterface, PasswordAuthenticatedUserInterface
     public function setTel(string $tel): static
     {
         $this->tel = $tel;
-
-        return $this;
-    }
-
-    public function getRole(): ?string
-    {
-        return $this->role;
-    }
-
-    public function setRole(string $role): static
-    {
-        $this->role = $role;
 
         return $this;
     }

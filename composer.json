@@ -39,11 +39,13 @@
         "symfony/string": "7.2.*",
         "symfony/translation": "7.2.*",
         "symfony/twig-bundle": "7.2.*",
+        "symfony/ux-live-component": "^2.26",
         "symfony/ux-turbo": "^2.24",
         "symfony/validator": "7.2.*",
         "symfony/web-link": "7.2.*",
         "symfony/yaml": "7.2.*",
         "twig/extra-bundle": "^2.12|^3.0",
+        "twig/intl-extra": "^3.21",
         "twig/twig": "^2.12|^3.0"
     },
     "config": {

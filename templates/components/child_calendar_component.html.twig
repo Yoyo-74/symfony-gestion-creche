@@ -1,0 +1,135 @@
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet">
+<style>
+    #calendar-{{ this.childId }} {
+        margin: 2rem 0;
+        padding: 1rem;
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        min-height: 500px;
+    }
+    .fc-event {
+        cursor: pointer;
+    }
+    .fc-event.present {
+        background-color: #28a745;
+        border-color: #28a745;
+    }
+    .fc-event.absent {
+        background-color: #ffc107;
+        border-color: #ffc107;
+    }
+</style>
+
+{# Debug: Afficher les données brutes #}
+<div style="display: none;">
+    <pre>Données du calendrier: {{ this.getEvents()|json_encode(constant('JSON_PRETTY_PRINT')) }}</pre>
+</div>
+
+<div {{ attributes }}>
+    <div id="calendar-{{ this.childId }}" 
+         data-child-id="{{ this.childId }}" 
+         data-events="{{ this.getEvents()|json_encode|e('html_attr') }}">
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
+<script>
+    (function() {
+        let calendar = null;
+
+        // Fonction d'initialisation du calendrier
+        function initializeCalendar() {
+            const calendarId = 'calendar-{{ this.childId }}';
+            console.log('Initialisation du calendrier:', calendarId);
+            
+            const calendarEl = document.getElementById(calendarId);
+            if (!calendarEl) {
+                console.error(`Élément calendrier #${calendarId} non trouvé`);
+                return;
+            }
+
+            // Si un calendrier existe déjà, le détruire
+            if (calendar) {
+                calendar.destroy();
+                calendar = null;
+            }
+
+            try {
+                const eventsData = calendarEl.dataset.events;
+                console.log('Données brutes:', eventsData);
+                
+                const events = JSON.parse(eventsData || '[]');
+                console.log('Événements parsés:', events);
+
+                calendar = new FullCalendar.Calendar(calendarEl, {
+                    initialView: 'dayGridMonth',
+                    locale: 'fr',
+                    headerToolbar: {
+                        left: 'prev,next today',
+                        center: 'title',
+                        right: 'dayGridMonth,timeGridWeek'
+                    },
+                    events: events,
+                    editable: true,
+                    eventDisplay: 'block',
+                    displayEventTime: true,
+                    slotMinTime: '07:00:00',
+                    slotMaxTime: '20:00:00',
+                    eventTimeFormat: {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        hour12: false
+                    },
+                    eventDidMount: function(info) {
+                        console.log('Événement monté:', info.event.title);
+                    },
+                    eventClick: function(info) {
+                        console.log('Clic sur événement:', info.event);
+                        const isPresent = !info.event.backgroundColor.includes('28a745');
+                        if (confirm(isPresent ? 'Marquer comme présent ?' : 'Marquer comme absent ?')) {
+                            this.dispatchEvent('updatePresence', {
+                                eventId: info.event.id,
+                                isPresent: isPresent
+                            });
+                            info.event.setProp('backgroundColor', isPresent ? '#28a745' : '#ffc107');
+                            info.event.setProp('borderColor', isPresent ? '#28a745' : '#ffc107');
+                        }
+                    }.bind(this),
+                    eventDrop: function(info) {
+                        console.log('Événement déplacé:', info.event);
+                        this.dispatchEvent('updateEvent', {
+                            eventId: info.event.id,
+                            start: info.event.start,
+                            end: info.event.end || info.event.start
+                        });
+                    }.bind(this),
+                    eventResize: function(info) {
+                        console.log('Événement redimensionné:', info.event);
+                        this.dispatchEvent('updateEvent', {
+                            eventId: info.event.id,
+                            start: info.event.start,
+                            end: info.event.end
+                        });
+                    }.bind(this)
+                });
+
+                calendar.render();
+                console.log('Calendrier initialisé avec succès');
+            } catch (error) {
+                console.error('Erreur lors de l\'initialisation du calendrier:', error);
+            }
+        }
+
+        // Initialiser le calendrier quand le DOM est chargé
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializeCalendar);
+        } else {
+            initializeCalendar();
+        }
+
+        // Réinitialiser le calendrier lors des mises à jour du composant
+        document.addEventListener('live:connect', initializeCalendar);
+        document.addEventListener('live:update', initializeCalendar);
+    })();
+</script> 

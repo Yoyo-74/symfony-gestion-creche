@@ -1,3 +1,46 @@
 body {
     background-color: skyblue;
 }
+.time-input select {
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+.time-input select:not(:has(option:checked[value=""])) {
+  border-color: rgb(108, 116, 124);
+  background-color: rgba(108, 116, 124, 0.1);
+}
+.time-input select option[value=""] {
+  color: #666;
+  font-style: italic;
+}
+
+
+.form-container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 20px;
+}
+
+.form-section {
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+}
+
+.form-section h2 {
+    color: #333;
+    margin-bottom: 1.5rem;
+}
+
+.btn-primary {
+    margin-top: 1rem;
+}
+
+thead {
+    
+    background: RGB(228, 228, 228);
+    background: linear-gradient(266deg, rgba(228, 228, 228, 1) 0%, rgba(160, 160, 160, 1) 26%, rgba(160, 160, 160, 1) 85%, rgba(228, 228, 228, 1) 100%);
+}
