@@ -63,14 +63,44 @@ class CalendarChildsRepository extends ServiceEntityRepository
 
     public function countMealsForDate(\DateTime $date): int
     {
-        return $this->createQueryBuilder('c')
-            ->select('COUNT(DISTINCT c.child)')
-            ->join('c.idcalendar', 'cal')
+        // Plage horaire du repas sur la même date que $date
+        $repasStart = clone $date;
+        $repasStart->setTime(12, 0);
+
+        $repasEnd = clone $date;
+        $repasEnd->setTime(13, 30);
+
+        // Requête Doctrine
+        $qb = $this->createQueryBuilder('c')
             ->where('c.date = :date')
-            ->andWhere('c.ispresent = true')
+            ->andWhere('c.heure_arrivee < :repasEnd')
+            ->andWhere('c.heure_depart > :repasStart')
             ->setParameter('date', $date->format('Y-m-d'))
-            ->getQuery()
-            ->getSingleScalarResult();
+            ->setParameter('repasStart', '12:00:00') // format TIME
+            ->setParameter('repasEnd', '13:30:00');  // format TIME
+
+        $results = $qb->getQuery()->getResult();
+        $count = 0;
+
+        foreach ($results as $calendarChild) {
+            $arrivee = $calendarChild->getHeureArrivee();
+            $depart = $calendarChild->getHeureDepart();
+
+            // Injecte la bonne date pour pouvoir faire un diff réaliste
+            $arrivee->setDate($date->format('Y'), $date->format('m'), $date->format('d'));
+            $depart->setDate($date->format('Y'), $date->format('m'), $date->format('d'));
+
+            // Calcul de la présence réelle pendant la plage de repas
+            $startPresence = max($arrivee, $repasStart);
+            $endPresence = min($depart, $repasEnd);
+            $durationSeconds = max(0, $endPresence->getTimestamp() - $startPresence->getTimestamp());
+
+            if ($durationSeconds >= 3600) {
+                $count++;
+            }
+        }
+
+        return $count;
     }
 
     
@@ -122,5 +152,47 @@ class CalendarChildsRepository extends ServiceEntityRepository
             ->orderBy('cc.heure_arrivee', 'ASC')
             ->getQuery()
             ->getResult();
+    }
+    public function sumPresenceHoursForPeriod(\DateTime $start, \DateTime $end): float
+    {
+        $qb = $this->createQueryBuilder('c')
+            ->where('c.date BETWEEN :start AND :end')
+            ->andWhere('c.ispresent = true')
+            ->setParameter('start', $start->format('Y-m-d'))
+            ->setParameter('end', $end->format('Y-m-d'));
+
+        $results = $qb->getQuery()->getResult();
+        $totalSeconds = 0;
+        foreach ($results as $calendarChild) {
+            $arrivee = $calendarChild->getHeureArrivee();
+            $depart = $calendarChild->getHeureDepart();
+            if ($arrivee && $depart) {
+                // On force la date pour éviter les erreurs de diff
+                $arrivee->setDate(2000, 1, 1);
+                $depart->setDate(2000, 1, 1);
+                $totalSeconds += max(0, $depart->getTimestamp() - $arrivee->getTimestamp());
+            }
+        }
+        return round($totalSeconds / 3600, 2); // en heures
+    }
+    public function sumPlannedHoursForPeriod(\DateTime $start, \DateTime $end): float
+    {
+        $qb = $this->createQueryBuilder('c')
+            ->where('c.date BETWEEN :start AND :end')
+            ->setParameter('start', $start->format('Y-m-d'))
+            ->setParameter('end', $end->format('Y-m-d'));
+
+        $results = $qb->getQuery()->getResult();
+        $totalSeconds = 0;
+        foreach ($results as $calendarChild) {
+            $arrivee = $calendarChild->getHeureArrivee();
+            $depart = $calendarChild->getHeureDepart();
+            if ($arrivee && $depart) {
+                $arrivee->setDate(2000, 1, 1);
+                $depart->setDate(2000, 1, 1);
+                $totalSeconds += max(0, $depart->getTimestamp() - $arrivee->getTimestamp());
+            }
+        }
+        return round($totalSeconds / 3600, 2); // en heures
     }
 }

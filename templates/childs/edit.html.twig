@@ -342,10 +342,8 @@
 {% block javascripts %}
     {{ parent() }}
     <script>
-        // Attendre que le DOM soit chargé
-        window.addEventListener('load', function() {
-            alert('Le JavaScript est chargé !');
-            
+        document.addEventListener('turbo:load', function() {
+            console.log('JS chargé avec Turbo !');
             // Sélectionner les éléments
             const showFormButton = document.getElementById('showResponsableForm');
             const formContainer = document.getElementById('newResponsableFormContainer');
@@ -377,7 +375,6 @@
 
             // Afficher le formulaire
             showFormButton.onclick = function() {
-                alert('Bouton cliqué !');
                 formContainer.style.display = 'block';
                 showFormButton.style.display = 'none';
             };

@@ -275,9 +275,9 @@
                     <p>Aucun enfant rattaché à cet utilisateur.</p>
                 {% endif %}
 
-                <button type="button" class="btn btn-success" id="showChildForm">
+                <a href="{{ path('app_users_add_child', {'id': user.id}) }}" class="btn btn-success" id="showChildForm">
                     Ajouter un enfant
-                </button>
+                </a>
             </div>
         </div>
 
@@ -506,20 +506,40 @@
                 const scheduleForm = document.getElementById('scheduleForm');
                 if (scheduleForm) {
                     console.log('Ajout des données du planning');
-                    const scheduleInputs = scheduleForm.querySelectorAll('select, input');
-                    scheduleInputs.forEach(input => {
-                        if (input.name) {
-                            // Pour les horaires, on crée une chaîne de caractères au format HH:MM
-                            if (input.name.endsWith('_a') || input.name.endsWith('_d')) {
-                                const timeInputs = input.parentElement.querySelectorAll('select');
-                                const hours = timeInputs[0].value.padStart(2, '0');
-                                const minutes = timeInputs[1].value.padStart(2, '0');
-                                const timeString = `${hours}:${minutes}`;
-                                console.log(`Ajout de ${input.name}: ${timeString}`);
-                                formData.append(input.name, timeString);
-                            } else {
-                                console.log(`Ajout de ${input.name}: ${input.value}`);
-                                formData.append(input.name, input.value);
+                    
+                    // Récupérer les dates
+                    const dateDebut = scheduleForm.querySelector('[name="date_debut"]');
+                    const dateFin = scheduleForm.querySelector('[name="date_fin"]');
+                    
+                    if (dateDebut) {
+                        formData.append('child_schedule[date_debut]', dateDebut.value);
+                    }
+                    if (dateFin) {
+                        formData.append('child_schedule[date_fin]', dateFin.value);
+                    }
+
+                    // Traiter les horaires pour chaque jour
+                    ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi'].forEach(jour => {
+                        const arriveeSelects = scheduleForm.querySelectorAll(`[name^="${jour}_a"]`);
+                        const departSelects = scheduleForm.querySelectorAll(`[name^="${jour}_d"]`);
+
+                        if (arriveeSelects.length === 2) {
+                            const heureA = arriveeSelects[0].value;
+                            const minuteA = arriveeSelects[1].value;
+                            if (heureA && minuteA) {
+                                const timeStringA = `${heureA.padStart(2, '0')}:${minuteA.padStart(2, '0')}`;
+                                formData.append(`child_schedule[${jour}_a]`, timeStringA);
+                                console.log(`Ajout horaire arrivée ${jour}:`, timeStringA);
+                            }
+                        }
+
+                        if (departSelects.length === 2) {
+                            const heureD = departSelects[0].value;
+                            const minuteD = departSelects[1].value;
+                            if (heureD && minuteD) {
+                                const timeStringD = `${heureD.padStart(2, '0')}:${minuteD.padStart(2, '0')}`;
+                                formData.append(`child_schedule[${jour}_d]`, timeStringD);
+                                console.log(`Ajout horaire départ ${jour}:`, timeStringD);
                             }
                         }
                     });
@@ -527,12 +547,12 @@
 
                 // Ajouter les données des responsables
                 const responsablesForms = document.querySelectorAll('.responsable-form');
-                responsablesForms.forEach((form, index) => {
-                    const inputs = form.querySelectorAll('input, select');
+                responsablesForms.forEach((respForm, index) => {
+                    const inputs = respForm.querySelectorAll('input, select');
                     inputs.forEach(input => {
                         if (input.name) {
-                            const name = input.name.replace('__name__', index);
-                            formData.append(name, input.value);
+                            const name = input.name.replace('__name__', '');
+                            formData.append(`responsables[${index}][${name}]`, input.value);
                         }
                     });
                 });
@@ -550,9 +570,15 @@
                     method: 'POST',
                     body: formData,
                     headers: {
-                        'X-Requested-With': 'XMLHttpRequest'
+                        'Accept': 'application/json'
                     }
                 });
+
+                if (!response.ok) {
+                    const text = await response.text();
+                    console.error('Réponse serveur non-OK:', text);
+                    throw new Error(`Erreur serveur: ${response.status}`);
+                }
 
                 console.log('Réponse reçue du serveur');
                 const data = await response.json();

@@ -473,13 +473,15 @@ th { text-align: left; }
                         {% endfor %}
                         <td>
                             <div class="switch-container">
-                                <input 
-                                    type="checkbox" 
-                                    class="switch-checkbox" 
-                                    id="switchPresence_{{ presence.id }}"
-                                    {% if presence.ispresent %}checked{% endif %}
-                                    data-csrf-token="{{ csrf_token('update-presence') }}"
-                                >
+                                {% if date|date('Y-m-d') == "now"|date('Y-m-d') %}
+                                    <input 
+                                        type="checkbox" 
+                                        class="switch-checkbox" 
+                                        id="switchPresence_{{ presence.id }}"
+                                        {% if presence.ispresent %}checked{% endif %}
+                                        data-csrf-token="{{ csrf_token('update-presence') }}"
+                                    >
+                                {% endif %}
                                 <label class="switch-label" for="switchPresence_{{ presence.id }}">
                                     <span class="switch-button"></span>
                                     <span class="switch-text">{{ presence.ispresent ? 'Présent' : 'Absent' }}</span>

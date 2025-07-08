@@ -55,6 +55,31 @@
                 <div class="stat-number">{{ stats.repasAPrevoir }}</div>
                 <div class="stat-label">Repas à prévoir</div>
             </div>
+            
+            <div class="stat-card">
+                <div class="stat-number">{{ stats.nbrAnniversaires }}</div>
+                <div class="stat-label">
+                    Anniversaire(s) aujourd'hui
+                    {% if stats.nbrAnniversaires > 0 %}
+                        <br>
+                        <small>
+                            {{ stats.prenomsAnniversaires|join(', ') }}
+                        </small>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">{{ stats.heuresAnnee }}</div>
+                <div class="stat-label">Heures de présence depuis le début de l'année</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">{{ stats.heuresMois }}</div>
+                <div class="stat-label">Heures de présence ce mois-ci</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">{{ stats.heuresSemainePrevues }}</div>
+                <div class="stat-label">Heures prévisionnelles cette semaine</div>
+            </div>
         </div>
     </div>
 {% endblock %}
