@@ -111,250 +111,122 @@ final class UsersController extends AbstractController
         return $this->redirectToRoute('app_users_index', [], Response::HTTP_SEE_OTHER);
     }
 
-    private function createCalendarEntries(
-        Childs $child,
-        array $horaires,
-        \DateTime $dateDebut,
-        \DateTime $dateFin,
-        EntityManagerInterface $entityManager
-    ): void {
-        try {
-            $calendar = $entityManager->getRepository(Calendar::class);
-            
-            $interval = new \DateInterval('P1D');
-            $period = new \DatePeriod($dateDebut, $interval, $dateFin);
+    private function createCalendarEntries(Childs $child, array $scheduleData, \DateTime $dateDebut, \DateTime $dateFin, EntityManagerInterface $entityManager): void
+    {
+        $jours = ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi'];
+        $interval = new \DateInterval('P1D');
+        $period = new \DatePeriod($dateDebut, $interval, (clone $dateFin)->modify('+1 day'));
 
-            // Map des jours avec correspondance entre anglais, français (BDD) et clés du formulaire
-            $joursSemaine = [
-                'Monday' => ['db' => 'Lundi', 'form' => 'lundi'],
-                'Tuesday' => ['db' => 'Mardi', 'form' => 'mardi'],
-                'Wednesday' => ['db' => 'Mercredi', 'form' => 'mercredi'],
-                'Thursday' => ['db' => 'Jeudi', 'form' => 'jeudi'],
-                'Friday' => ['db' => 'Vendredi', 'form' => 'vendredi']
+        $calendarRepo = $entityManager->getRepository(Calendar::class);
+
+        foreach ($period as $date) {
+            $jourSemaine = strtolower($date->format('l'));
+            $map = [
+                'monday' => 'lundi',
+                'tuesday' => 'mardi',
+                'wednesday' => 'mercredi',
+                'thursday' => 'jeudi',
+                'friday' => 'vendredi',
             ];
-
-            foreach ($period as $date) {
-                $jour = $date->format('l'); // Récupère le jour en anglais
-                if (!isset($joursSemaine[$jour])) {
-                    continue; // Skip weekend
-                }
-
-                $jourFrancais = $joursSemaine[$jour]['db'];
-                $jourForm = $joursSemaine[$jour]['form'];
-                
-                // Recherche dans Calendar avec le jour en français
-                $calendarDay = $calendar->findOneBy([
+            if (!isset($map[$jourSemaine])) continue;
+            $jour = $map[$jourSemaine];
+            $arriveeKey = $jour . '_a';
+            $departKey = $jour . '_d';
+            if (!empty($scheduleData[$arriveeKey]) && !empty($scheduleData[$departKey])) {
+                $calendar = $calendarRepo->findOneBy([
                     'date' => $date,
-                    'day' => $jourFrancais
+                    'day' => ucfirst($jour),
                 ]);
-                
-                if (!$calendarDay || !$calendarDay->isopen()) {
-                    continue;
+
+                if (!$calendar) {
+                    throw new \LogicException("Aucune entrée Calendar pour la date " . $date->format('Y-m-d'));
                 }
 
-                $heureArriveeKey = $jourForm . '_a';
-                $heureDepartKey = $jourForm . '_d';
-
-                if (isset($horaires[$heureArriveeKey]) && isset($horaires[$heureDepartKey])) {
-                    try {
-                        // Créer des objets DateTime pour les heures
-                        $heureArrivee = new \DateTime();
-                        $heureDepart = new \DateTime();
-                        
-                        // Extraire les heures et minutes
-                        list($heureA, $minuteA) = explode(':', $horaires[$heureArriveeKey]);
-                        list($heureD, $minuteD) = explode(':', $horaires[$heureDepartKey]);
-                        
-                        $heureArrivee->setTime((int)$heureA, (int)$minuteA);
-                        $heureDepart->setTime((int)$heureD, (int)$minuteD);
-
-                        $calendarChild = new CalendarChilds();
-                        $calendarChild->setChild($child);
-                        $calendarChild->setIdcalendar($calendarDay);
-                        $calendarChild->setDate($date);
-                        $calendarChild->setHeureArrivee($heureArrivee);
-                        $calendarChild->setHeureDepart($heureDepart);
-                        $calendarChild->setIspresent(false);
-                        
-                        $entityManager->persist($calendarChild);
-                        $entityManager->flush();
-                    } catch (\Exception $e) {
-                        $this->logger->error("Erreur lors de la création de l'entrée du calendrier", [
-                            'date' => $date->format('Y-m-d'),
-                            'jour' => $jourFrancais,
-                            'heureArrivee' => $horaires[$heureArriveeKey],
-                            'heureDepart' => $horaires[$heureDepartKey],
-                            'error' => $e->getMessage()
-                        ]);
-                    }
-                }
+                $calendarChild = new CalendarChilds();
+                $calendarChild->setIdcalendar($calendar);
+                $calendarChild->setChild($child);
+                $calendarChild->setDate(clone $date);
+                $calendarChild->setHeureArrivee($scheduleData[$arriveeKey]);
+                $calendarChild->setHeureDepart($scheduleData[$departKey]);
+                $calendarChild->setIspresent(false);
+                $entityManager->persist($calendarChild);
             }
-        } catch (\Exception $e) {
-            $this->logger->error("Erreur globale dans createCalendarEntries", [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-            throw $e;
         }
+        $entityManager->flush();
     }
 
     #[Route('/{id}/add-child', name: 'app_users_add_child', methods: ['GET', 'POST'])]
-    public function addChild(Request $request, Users $user, EntityManagerInterface $entityManager): Response
+    public function addChildForm(Request $request, Users $user, EntityManagerInterface $entityManager): Response
     {
-        if (!$request->isXmlHttpRequest()) {
-            return new Response('Cette route nécessite une requête AJAX', Response::HTTP_BAD_REQUEST);
-        }
+        $child = new Childs();
+        $form = $this->createForm(\App\Form\ChildsForm::class, $child);
+        $form->handleRequest($request);
 
-        try {
-            // Vérification du token CSRF
-            $submittedToken = $request->request->get('token');
-            if (!$this->isCsrfTokenValid('add_child', $submittedToken)) {
-                throw new \Exception('Token CSRF invalide');
-            }
+        // Gestion des responsables dynamiques (optionnel, à adapter si besoin)
+        $responsablesData = $request->request->all('responsables');
 
-            $data = $request->request->all();
-            
-            // Log des données reçues
-            $this->logger->debug('Données reçues dans addChild', [
-                'data' => $data,
-                'files' => $request->files->all()
-            ]);
-
-            // Validation des données requises
-            $requiredFields = ['nom', 'prenom', 'date_naissance', 'genre', 'date_entree'];
-            foreach ($requiredFields as $field) {
-                if (empty($data[$field])) {
-                    throw new \Exception("Le champ '$field' est requis");
-                }
-            }
-
-            // Création de l'enfant
-            $child = new Childs();
-            $child->setNom($data['nom']);
-            $child->setPrenom($data['prenom']);
-            
-            try {
-                $dateNaissance = new \DateTime($data['date_naissance']);
-                $child->setDateNaissance($dateNaissance);
-            } catch (\Exception $e) {
-                throw new \Exception("Format de date de naissance invalide: " . $e->getMessage());
-            }
-            
-            $child->setGenre($data['genre']);
-            
-            try {
-                $dateEntree = new \DateTime($data['date_entree']);
-                $child->setDateEntree($dateEntree);
-            } catch (\Exception $e) {
-                throw new \Exception("Format de date d'entrée invalide: " . $e->getMessage());
-            }
-
-            // Champs optionnels
-            if (!empty($data['allergies'])) {
-                $child->setAllergies($data['allergies']);
-            }
-            if (!empty($data['remarques_medicales'])) {
-                $child->setRemarquesMedicales($data['remarques_medicales']);
-            }
-            if (!empty($data['revenus'])) {
-                $child->setRevenus((float)$data['revenus']);
-            }
-
-            // Persistance de l'enfant
+        if ($form->isSubmitted() && $form->isValid()) {
+            // Enfant
             $entityManager->persist($child);
             $entityManager->flush();
 
-            // Création de la relation UsersChilds
+            // Lien UsersChilds
             $userChild = new UsersChilds();
             $userChild->setUser($user);
             $userChild->setChild($child);
             $entityManager->persist($userChild);
             $entityManager->flush();
 
-            // Création des entrées CalendarChilds
-            if (!empty($data['child_schedule'])) {
-                $this->logger->debug('Données du planning reçues', [
-                    'child_schedule' => $data['child_schedule']
-                ]);
-
-                if (empty($data['child_schedule']['date_debut']) || empty($data['child_schedule']['date_fin'])) {
-                    throw new \Exception('Les dates de début et de fin sont requises pour le planning');
-                }
-
-                try {
-                    $dateDebut = new \DateTime($data['child_schedule']['date_debut']);
-                    $dateFin = new \DateTime($data['child_schedule']['date_fin']);
-                    
-                    // Récupérer les horaires directement du formulaire
-                    $horaires = [];
-                    foreach (['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi'] as $jour) {
-                        $arriveeKey = $jour . '_a';
-                        $departKey = $jour . '_d';
-                        
-                        if (!empty($data['child_schedule'][$arriveeKey]) && !empty($data['child_schedule'][$departKey])) {
-                            $horaires[$arriveeKey] = $data['child_schedule'][$arriveeKey];
-                            $horaires[$departKey] = $data['child_schedule'][$departKey];
-                        }
-                    }
-
-                    $this->createCalendarEntries($child, $horaires, $dateDebut, $dateFin, $entityManager);
-                } catch (\Exception $e) {
-                    $this->logger->error("Erreur lors de la création des entrées du calendrier", [
-                        'error' => $e->getMessage(),
-                        'trace' => $e->getTraceAsString()
-                    ]);
-                    throw new \Exception("Erreur lors de la création du planning : " . $e->getMessage());
-                }
+            // Planning
+            $dateDebut = $form->get('date_debut')->getData();
+            $dateFin = $form->get('date_fin')->getData();
+            if ($dateDebut && $dateFin) {
+                $horaires = [
+                    'lundi_a' => $form->get('lundi_a')->getData(),
+                    'lundi_d' => $form->get('lundi_d')->getData(),
+                    'mardi_a' => $form->get('mardi_a')->getData(),
+                    'mardi_d' => $form->get('mardi_d')->getData(),
+                    'mercredi_a' => $form->get('mercredi_a')->getData(),
+                    'mercredi_d' => $form->get('mercredi_d')->getData(),
+                    'jeudi_a' => $form->get('jeudi_a')->getData(),
+                    'jeudi_d' => $form->get('jeudi_d')->getData(),
+                    'vendredi_a' => $form->get('vendredi_a')->getData(),
+                    'vendredi_d' => $form->get('vendredi_d')->getData(),
+                ];
+                $this->createCalendarEntries($child, $horaires, $dateDebut, $dateFin, $entityManager);
             }
 
-            // Traitement des responsables
-            if (isset($data['responsables']) && is_array($data['responsables'])) {
-                foreach ($data['responsables'] as $respData) {
+            // Responsables (à adapter selon la structure du formulaire)
+            if (!empty($responsablesData) && is_array($responsablesData)) {
+                foreach ($responsablesData as $respData) {
                     if (empty($respData['nom']) || empty($respData['prenom']) || empty($respData['lien'])) {
                         continue;
                     }
-
                     $responsable = new Responsables();
                     $responsable->setNom($respData['nom']);
                     $responsable->setPrenom($respData['prenom']);
-                    
-                    if (!empty($respData['email'])) {
-                        $responsable->setEmail($respData['email']);
-                    }
-                    if (!empty($respData['tel'])) {
-                        $responsable->setTel($respData['tel']);
-                    }
-
+                    if (!empty($respData['email'])) $responsable->setEmail($respData['email']);
+                    if (!empty($respData['tel'])) $responsable->setTel($respData['tel']);
                     $entityManager->persist($responsable);
                     $entityManager->flush();
-
                     $responsableChild = new ResponsablesChilds();
                     $responsableChild->setResponsable($responsable);
                     $responsableChild->setChild($child);
                     $responsableChild->setLien($respData['lien']);
-                    
                     $entityManager->persist($responsableChild);
                     $entityManager->flush();
                 }
             }
 
-            return $this->json([
-                'success' => true,
-                'message' => 'Enfant ajouté avec succès',
-                'childId' => $child->getId()
-            ]);
-
-        } catch (\Exception $e) {
-            $this->logger->error('Erreur lors de l\'ajout de l\'enfant', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-            
-            return $this->json([
-                'success' => false,
-                'message' => $e->getMessage()
-            ], Response::HTTP_BAD_REQUEST);
+            $this->addFlash('success', 'L\'enfant a bien été créé et rattaché à l\'utilisateur.');
+            return $this->redirectToRoute('app_users_edit', ['id' => $user->getId()]);
         }
+
+        return $this->render('childs/new_for_user.html.twig', [
+            'user' => $user,
+            'form' => $form,
+            'responsablesData' => $responsablesData,
+        ]);
     }
 
     #[Route('/{id}/remove-child', name: 'app_users_remove_child', methods: ['POST'])]

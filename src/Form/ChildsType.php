@@ -36,7 +36,7 @@ class ChildsType extends AbstractType
             ->add('genre', ChoiceType::class, [
             'choices' => [
                 'Fille' => 'F',
-                'Garçon' => 'M'
+                'Garçon' => 'G'
             ],
             'expanded' => true,
             'multiple' => false,

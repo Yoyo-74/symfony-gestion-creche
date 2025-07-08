@@ -1,0 +1,220 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Ajouter un enfant à {{ user.prenom }} {{ user.nom }}{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        .info-section {
+            margin: 2rem 0;
+            padding: 1rem;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .info-header {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #7f8c8d;
+            font-weight: bold;
+        }
+        .form-control {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        .time-input select {
+            width: auto;
+            margin-right: 0.5rem;
+        }
+        .action-buttons {
+            margin-top: 2rem;
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-start;
+            align-items: center;
+        }
+        .btn {
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .btn-primary {
+            background-color: #3498db;
+            color: white;
+        }
+        .btn-secondary {
+            background-color: #95a5a6;
+            color: white;
+        }
+        .btn-danger {
+            background-color: #e74c3c;
+            color: white;
+        }
+        .btn-success {
+            background-color: #2ecc71;
+            color: white;
+        }
+        .responsable-form {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            position: relative;
+        }
+        .remove-responsable-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            color: #dc3545;
+            background: none;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+        }
+        .responsables-container {
+            position: relative;
+        }
+        .add-responsable-btn {
+            margin-top: 1rem;
+            background-color: #2ecc71;
+            color: white;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+<div class="container">
+    <h1 class="info-header">Ajouter un enfant à {{ user.prenom }} {{ user.nom }}</h1>
+    {{ form_start(form) }}
+        <div class="info-section">
+            <h2 class="info-header">Informations de l'enfant</h2>
+            <div class="form-group">{{ form_label(form.nom) }}{{ form_widget(form.nom, {'attr': {'class': 'form-control'}}) }}</div>
+            <div class="form-group">{{ form_label(form.prenom) }}{{ form_widget(form.prenom, {'attr': {'class': 'form-control'}}) }}</div>
+            <div class="form-group">{{ form_label(form.date_naissance) }}{{ form_widget(form.date_naissance, {'attr': {'class': 'form-control'}}) }}</div>
+            <div class="form-group">{{ form_label(form.genre) }}{{ form_widget(form.genre) }}</div>
+            <div class="form-group">{{ form_label(form.allergies) }}{{ form_widget(form.allergies, {'attr': {'class': 'form-control'}}) }}</div>
+            <div class="form-group">{{ form_label(form.remarques_medicales) }}{{ form_widget(form.remarques_medicales, {'attr': {'class': 'form-control'}}) }}</div>
+            <div class="form-group">{{ form_label(form.revenus) }}{{ form_widget(form.revenus, {'attr': {'class': 'form-control'}}) }}</div>
+            <div class="form-group">{{ form_label(form.date_entree) }}{{ form_widget(form.date_entree, {'attr': {'class': 'form-control'}}) }}</div>
+            <div class="form-group">{{ form_label(form.date_sortie) }}{{ form_widget(form.date_sortie, {'attr': {'class': 'form-control'}}) }}</div>
+        </div>
+    
+        <div class="info-section">
+            <h2 class="info-header">Planning</h2>
+            <div class="form-group">
+                <label>Période de planning</label>
+                <div style="display: flex; gap: 1rem;">
+                    {{ form_widget(form.date_debut, {'attr': {'class': 'form-control'}}) }}
+                    {{ form_widget(form.date_fin, {'attr': {'class': 'form-control'}}) }}
+                </div>
+            </div>
+            <table class="schedule-table">
+                <thead>
+                    <tr>
+                        <th>Jour</th>
+                        <th>Heure d'arrivée</th>
+                        <th>Heure de départ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Lundi</td>
+                        <td>{{ form_widget(form.lundi_a) }}</td>
+                        <td>{{ form_widget(form.lundi_d) }}</td>
+                    </tr>
+                    <tr>
+                        <td>Mardi</td>
+                        <td>{{ form_widget(form.mardi_a) }}</td>
+                        <td>{{ form_widget(form.mardi_d) }}</td>
+                    </tr>
+                    <tr>
+                        <td>Mercredi</td>
+                        <td>{{ form_widget(form.mercredi_a) }}</td>
+                        <td>{{ form_widget(form.mercredi_d) }}</td>
+                    </tr>
+                    <tr>
+                        <td>Jeudi</td>
+                        <td>{{ form_widget(form.jeudi_a) }}</td>
+                        <td>{{ form_widget(form.jeudi_d) }}</td>
+                    </tr>
+                    <tr>
+                        <td>Vendredi</td>
+                        <td>{{ form_widget(form.vendredi_a) }}</td>
+                        <td>{{ form_widget(form.vendredi_d) }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="info-section">
+            <h2 class="info-header">Responsables</h2>
+            <div class="responsables-container" data-prototype="{{ include('childs/_add_responsable_form.html.twig', {'name': '__name__'})|e('html_attr') }}">
+                <div class="responsables-list"></div>
+                <button type="button" class="btn add-responsable-btn">Ajouter un responsable</button>
+            </div>
+        </div>
+
+        <div class="action-buttons">
+            <a href="{{ path('app_users_edit', {'id': user.id}) }}" class="btn btn-secondary">Annuler</a>
+            <button type="submit" class="btn btn-primary">Créer l'enfant</button>
+        </div>
+    {{ form_end(form) }}
+</div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        function setupResponsablesForm() {
+            const container = document.querySelector('.responsables-container');
+            if (!container) return;
+            const addButton = container.querySelector('.add-responsable-btn');
+            const list = container.querySelector('.responsables-list');
+            let index = list.children.length;
+
+            // Supprimer tout ancien gestionnaire pour éviter les doublons
+            addButton.replaceWith(addButton.cloneNode(true));
+            const newAddButton = container.querySelector('.add-responsable-btn');
+
+            newAddButton.addEventListener('click', function() {
+                const prototype = container.dataset.prototype;
+                const newForm = prototype.replace(/__name__/g, index);
+                const div = document.createElement('div');
+                div.innerHTML = newForm;
+                div.classList.add('responsable-form');
+                const removeButton = document.createElement('button');
+                removeButton.type = 'button';
+                removeButton.className = 'remove-responsable-btn';
+                removeButton.innerHTML = '×';
+                removeButton.onclick = function() { div.remove(); };
+                div.appendChild(removeButton);
+                list.appendChild(div);
+                index++;
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', setupResponsablesForm);
+        document.addEventListener('turbo:load', setupResponsablesForm);
+    </script>
+{% endblock %} 
