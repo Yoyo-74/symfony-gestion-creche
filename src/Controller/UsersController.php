@@ -113,7 +113,6 @@ final class UsersController extends AbstractController
 
     private function createCalendarEntries(Childs $child, array $scheduleData, \DateTime $dateDebut, \DateTime $dateFin, EntityManagerInterface $entityManager): void
     {
-        $jours = ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi'];
         $interval = new \DateInterval('P1D');
         $period = new \DatePeriod($dateDebut, $interval, (clone $dateFin)->modify('+1 day'));
 
@@ -128,18 +127,28 @@ final class UsersController extends AbstractController
                 'thursday' => 'jeudi',
                 'friday' => 'vendredi',
             ];
+            
             if (!isset($map[$jourSemaine])) continue;
+            
             $jour = $map[$jourSemaine];
             $arriveeKey = $jour . '_a';
             $departKey = $jour . '_d';
-            if (!empty($scheduleData[$arriveeKey]) && !empty($scheduleData[$departKey])) {
+            
+            // Vérifier que les horaires existent pour ce jour
+            if (isset($scheduleData[$arriveeKey]) && isset($scheduleData[$departKey])) {
                 $calendar = $calendarRepo->findOneBy([
                     'date' => $date,
                     'day' => ucfirst($jour),
                 ]);
 
                 if (!$calendar) {
-                    throw new \LogicException("Aucune entrée Calendar pour la date " . $date->format('Y-m-d'));
+                    // Créer l'entrée Calendar si elle n'existe pas
+                    $calendar = new Calendar();
+                    $calendar->setDate(clone $date);
+                    $calendar->setDay(ucfirst($jour));
+                    $calendar->setIsopen(true);
+                    $entityManager->persist($calendar);
+                    $entityManager->flush(); // Flush pour avoir l'ID
                 }
 
                 $calendarChild = new CalendarChilds();
@@ -162,70 +171,94 @@ final class UsersController extends AbstractController
         $form = $this->createForm(\App\Form\ChildsForm::class, $child);
         $form->handleRequest($request);
 
-        // Gestion des responsables dynamiques (optionnel, à adapter si besoin)
-        $responsablesData = $request->request->all('responsables');
-
         if ($form->isSubmitted() && $form->isValid()) {
-            // Enfant
-            $entityManager->persist($child);
-            $entityManager->flush();
+            try {
+                // 1. Sauvegarde de l'enfant
+                $entityManager->persist($child);
+                $entityManager->flush();
 
-            // Lien UsersChilds
-            $userChild = new UsersChilds();
-            $userChild->setUser($user);
-            $userChild->setChild($child);
-            $entityManager->persist($userChild);
-            $entityManager->flush();
+                // Lien UsersChilds
+                $userChild = new UsersChilds();
+                $userChild->setUser($user);
+                $userChild->setChild($child);
+                $entityManager->persist($userChild);
 
-            // Planning
-            $dateDebut = $form->get('date_debut')->getData();
-            $dateFin = $form->get('date_fin')->getData();
-            if ($dateDebut && $dateFin) {
-                $horaires = [
-                    'lundi_a' => $form->get('lundi_a')->getData(),
-                    'lundi_d' => $form->get('lundi_d')->getData(),
-                    'mardi_a' => $form->get('mardi_a')->getData(),
-                    'mardi_d' => $form->get('mardi_d')->getData(),
-                    'mercredi_a' => $form->get('mercredi_a')->getData(),
-                    'mercredi_d' => $form->get('mercredi_d')->getData(),
-                    'jeudi_a' => $form->get('jeudi_a')->getData(),
-                    'jeudi_d' => $form->get('jeudi_d')->getData(),
-                    'vendredi_a' => $form->get('vendredi_a')->getData(),
-                    'vendredi_d' => $form->get('vendredi_d')->getData(),
-                ];
-                $this->createCalendarEntries($child, $horaires, $dateDebut, $dateFin, $entityManager);
-            }
+                // 2. Traitement des responsables depuis les données POST
+                $responsablesData = $request->request->all('responsables') ?? [];
+                
+                foreach ($responsablesData as $responsableData) {
+                    if (!empty($responsableData['nom']) && !empty($responsableData['prenom'])) {
+                        // Créer le responsable
+                        $responsable = new Responsables();
+                        $responsable->setNom($responsableData['nom']);
+                        $responsable->setPrenom($responsableData['prenom']);
+                        $responsable->setEmail($responsableData['email'] ?? null);
+                        $responsable->setTel($responsableData['tel'] ?? null);
+                        
+                        $entityManager->persist($responsable);
+                        $entityManager->flush(); // Flush pour avoir l'ID
 
-            // Responsables (à adapter selon la structure du formulaire)
-            if (!empty($responsablesData) && is_array($responsablesData)) {
-                foreach ($responsablesData as $respData) {
-                    if (empty($respData['nom']) || empty($respData['prenom']) || empty($respData['lien'])) {
-                        continue;
+                        // Créer la relation ResponsablesChilds
+                        $responsablesChilds = new ResponsablesChilds();
+                        $responsablesChilds->setChild($child);
+                        $responsablesChilds->setResponsable($responsable);
+                        $responsablesChilds->setLien($responsableData['lien'] ?? '');
+                        
+                        $entityManager->persist($responsablesChilds);
                     }
-                    $responsable = new Responsables();
-                    $responsable->setNom($respData['nom']);
-                    $responsable->setPrenom($respData['prenom']);
-                    if (!empty($respData['email'])) $responsable->setEmail($respData['email']);
-                    if (!empty($respData['tel'])) $responsable->setTel($respData['tel']);
-                    $entityManager->persist($responsable);
-                    $entityManager->flush();
-                    $responsableChild = new ResponsablesChilds();
-                    $responsableChild->setResponsable($responsable);
-                    $responsableChild->setChild($child);
-                    $responsableChild->setLien($respData['lien']);
-                    $entityManager->persist($responsableChild);
-                    $entityManager->flush();
                 }
-            }
 
-            $this->addFlash('success', 'L\'enfant a bien été créé et rattaché à l\'utilisateur.');
-            return $this->redirectToRoute('app_users_edit', ['id' => $user->getId()]);
+                // 3. Gestion du planning (ton code existant)
+                $scheduleData = [];
+                
+                // Récupération des horaires depuis les champs du formulaire
+                if ($form->has('lundi_a') && $form->get('lundi_a')->getData()) {
+                    $scheduleData['lundi_a'] = $form->get('lundi_a')->getData();
+                    $scheduleData['lundi_d'] = $form->get('lundi_d')->getData();
+                }
+                if ($form->has('mardi_a') && $form->get('mardi_a')->getData()) {
+                    $scheduleData['mardi_a'] = $form->get('mardi_a')->getData();
+                    $scheduleData['mardi_d'] = $form->get('mardi_d')->getData();
+                }
+                if ($form->has('mercredi_a') && $form->get('mercredi_a')->getData()) {
+                    $scheduleData['mercredi_a'] = $form->get('mercredi_a')->getData();
+                    $scheduleData['mercredi_d'] = $form->get('mercredi_d')->getData();
+                }
+                if ($form->has('jeudi_a') && $form->get('jeudi_a')->getData()) {
+                    $scheduleData['jeudi_a'] = $form->get('jeudi_a')->getData();
+                    $scheduleData['jeudi_d'] = $form->get('jeudi_d')->getData();
+                }
+                if ($form->has('vendredi_a') && $form->get('vendredi_a')->getData()) {
+                    $scheduleData['vendredi_a'] = $form->get('vendredi_a')->getData();
+                    $scheduleData['vendredi_d'] = $form->get('vendredi_d')->getData();
+                }
+
+                // Création du planning si des horaires sont définis
+                if (!empty($scheduleData) && $form->has('date_debut') && $form->has('date_fin')) {
+                    $dateDebut = $form->get('date_debut')->getData();
+                    $dateFin = $form->get('date_fin')->getData();
+                    
+                    if ($dateDebut && $dateFin) {
+                        $this->createCalendarEntries($child, $scheduleData, $dateDebut, $dateFin, $entityManager);
+                    }
+                }
+
+                $entityManager->flush();
+
+                // Redirection vers la page d'édition de l'utilisateur
+                return $this->redirectToRoute('app_users_edit', ['id' => $user->getId()]);
+
+            } catch (\Exception $e) {
+                error_log('Erreur lors de l\'ajout de l\'enfant: ' . $e->getMessage());
+                error_log('TRACE: ' . $e->getTraceAsString());
+                
+                $this->addFlash('error', 'Erreur lors de l\'ajout de l\'enfant: ' . $e->getMessage());
+            }
         }
 
         return $this->render('childs/new_for_user.html.twig', [
             'user' => $user,
             'form' => $form,
-            'responsablesData' => $responsablesData,
         ]);
     }
 

@@ -129,7 +129,8 @@
         }
 
         // Réinitialiser le calendrier lors des mises à jour du composant
+        document.addEventListener('turbo:load', initializeCalendar);
         document.addEventListener('live:connect', initializeCalendar);
         document.addEventListener('live:update', initializeCalendar);
     })();
-</script> 
+</script>

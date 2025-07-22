@@ -43,12 +43,12 @@
     {% endfor %}
 
     <div class="container">
-        <h1>Liste des enfants</h1>
+        <h1 class="text-center">Liste des enfants</h1>
 
         {{ component('child_search') }}
 
-        <a href="{{ path('app_childs_new') }}" class="btn btn-success mt-3">
+        {# <a href="{{ path('app_childs_new') }}" class="btn btn-success mt-3">
             <i class="fas fa-plus"></i> Ajouter un enfant
-        </a>
+        </a> #}
     </div>
 {% endblock %}

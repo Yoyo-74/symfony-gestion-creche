@@ -75,23 +75,69 @@ class DailyPlanningController extends AbstractController
     }
 
 
+// #[Route('/day', name: 'app_planning_day', methods: ['GET'])]
+//     public function planningDay(
+//         Request $request,
+//         CalendarRepository $calendarRepository,
+//         CalendarChildsRepository $planningRepository
+//     ): Response {
+//         $dateString = $request->query->get('date');
+//         dump($dateString);
+//         $date = $dateString ? new DateTime($dateString) : new \DateTime();
+//         $date->setTimezone(new DateTimeZone('Europe/Paris'));
+
+//         // Récupérer la semaine en cours
+//         $weekStart = clone $date;
+//         $weekStart->modify('monday this week');
+//         $weekEnd = clone $weekStart;
+//         $weekEnd->modify('+4 days');
+//         dump($weekEnd);
+//         $weekDays = $calendarRepository->createQueryBuilder('c')
+//             ->where('c.date >= :start')
+//             ->andWhere('c.date <= :end')
+//             ->setParameter('start', $weekStart)
+//             ->setParameter('end', $weekEnd)
+//             ->orderBy('c.date', 'ASC')
+//             ->getQuery()
+//             ->getResult();
+
+//         // Récupérer le nombre d'enfants pour chaque jour
+//         $childrenCounts = [];
+//         foreach ($weekDays as $day) {
+//             $dayDate = $day->getDate();
+//             $childrenCounts[$dayDate->format('Y-m-d')] = $planningRepository->countChildrenForDate($dayDate);
+//         }
+
+//         // Récupérer les présences du jour
+//         $presences = $planningRepository->findByDate($date);
+
+//         return $this->render('daily_planning/index.html.twig', [
+//             'date' => $date,
+//             'weekDays' => $weekDays,
+//             'presences' => $presences,
+//             'childrenCounts' => $childrenCounts,
+//         ]);
+//     }
+
+
 #[Route('/day', name: 'app_planning_day', methods: ['GET'])]
     public function planningDay(
         Request $request,
         CalendarRepository $calendarRepository,
         CalendarChildsRepository $planningRepository
     ): Response {
+        // 1. Récupérer la date courante (ou aujourd'hui par défaut)
         $dateString = $request->query->get('date');
-        dump($dateString);
-        $date = $dateString ? new DateTime($dateString) : new \DateTime();
-        $date->setTimezone(new DateTimeZone('Europe/Paris'));
+        $currentDate = $dateString ? new \DateTime($dateString) : new \DateTime();
+        $currentDate->setTimezone(new \DateTimeZone('Europe/Paris'));
 
-        // Récupérer la semaine en cours
-        $weekStart = clone $date;
-        $weekStart->modify('monday this week');
-        $weekEnd = clone $weekStart;
-        $weekEnd->modify('+4 days');
-        dump($weekEnd);
+        // 2. Calculer les dates précédente et suivante
+        $previousDate = (clone $currentDate)->modify('-1 day');
+        $nextDate = (clone $currentDate)->modify('+1 day');
+
+        // 3. Récupérer la semaine en cours (lundi à vendredi)
+        $weekStart = (clone $currentDate)->modify('monday this week');
+        $weekEnd = (clone $weekStart)->modify('+4 days');
         $weekDays = $calendarRepository->createQueryBuilder('c')
             ->where('c.date >= :start')
             ->andWhere('c.date <= :end')
@@ -101,26 +147,27 @@ class DailyPlanningController extends AbstractController
             ->getQuery()
             ->getResult();
 
-        // Récupérer le nombre d'enfants pour chaque jour
+        // 4. Récupérer le nombre d'enfants pour chaque jour de la semaine
         $childrenCounts = [];
         foreach ($weekDays as $day) {
             $dayDate = $day->getDate();
             $childrenCounts[$dayDate->format('Y-m-d')] = $planningRepository->countChildrenForDate($dayDate);
         }
 
-        // Récupérer les présences du jour
-        $presences = $planningRepository->findByDate($date);
+        // 5. Récupérer les présences du jour sélectionné
+        $presences = $planningRepository->findByDate($currentDate);
 
+        // 6. Rendu de la vue avec toutes les variables nécessaires
         return $this->render('daily_planning/index.html.twig', [
-            'date' => $date,
+            'date' => $currentDate,
+            'current_date' => $currentDate,
+            'previous_date' => $previousDate,
+            'next_date' => $nextDate,
             'weekDays' => $weekDays,
             'presences' => $presences,
             'childrenCounts' => $childrenCounts,
         ]);
     }
-
-
-
 
 
     

@@ -1,33 +1,57 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Calendar index{% endblock %}
+{% block title %}Calendrier d'ouverture de la Crèche{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+
+{% endblock %}
 
 {% block body %}
-    <h1>Calendar index</h1>
+<div class="container">
+    <h1 class="text-center">Calendrier d'ouverture de la Crèche</h1>
+
+    <form class="text-center" method="get" action="{{ path('app_calendar_index') }}" class="mb-4">
+        <label for="filter_date">Afficher à partir du :</label>
+        <input type="date" id="filter_date" name="filter_date" value="{{ app.request.get('filter_date') }}">
+        <button type="submit" class="btn btn-primary btn-sm">Filtrer</button>
+        {% if app.request.get('filter_date') %}
+            <a href="{{ path('app_calendar_index') }}" class="btn btn-secondary btn-sm">Réinitialiser</a>
+        {% endif %}
+    </form>
 
     <table class="table">
         <thead>
             <tr>
-                <th>Id</th>
+                {# <th>Id</th> #}
                 <th>Date</th>
-                <th>Day</th>
-                <th>Week</th>
-                <th>Isopen</th>
-                <th>actions</th>
+                <th>Jour</th>
+                <th>N° Semaine</th>
+                <th class="text-center">Crèche</th>
+                {# <th>actions</th> #}
             </tr>
         </thead>
         <tbody>
         {% for calendar in calendars %}
             <tr>
-                <td>{{ calendar.id }}</td>
+                {# <td>{{ calendar.id }}</td> #}
                 <td>{{ calendar.date ? calendar.date|date('Y-m-d') : '' }}</td>
                 <td>{{ calendar.day }}</td>
-                <td>{{ calendar.week }}</td>
-                <td>{{ calendar.isopen ? 'Yes' : 'No' }}</td>
+                <td class="text-center">{{ calendar.week }}</td>
                 <td>
+                    <input type="checkbox"
+                           class="isopen-switch"
+                           data-id="{{ calendar.id }}"
+                           id="isopen-switch-{{ calendar.id }}"
+                           {% if calendar.isopen %}checked{% endif %}>
+                    <span class="isopen-label {{ calendar.isopen ? 'open' : 'closed' }}" id="isopen-label-{{ calendar.id }}">
+                        {{ calendar.isopen ? 'Ouverte' : 'Fermée' }}
+                    </span>
+                </td>
+                {# <td>
                     <a href="{{ path('app_calendar_show', {'id': calendar.id}) }}">show</a>
                     <a href="{{ path('app_calendar_edit', {'id': calendar.id}) }}">edit</a>
-                </td>
+                </td> #}
             </tr>
         {% else %}
             <tr>
@@ -37,5 +61,51 @@
         </tbody>
     </table>
 
-    <a href="{{ path('app_calendar_new') }}">Create new</a>
+    {# <a href="{{ path('app_calendar_new') }}">Create new</a> #}
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+{# document.addEventListener('turbo:load', function() {
+    document.querySelectorAll('.isopen-switch').forEach(function(checkbox) {
+        checkbox.addEventListener('change', function() {
+            const id = this.dataset.id;
+            const label = document.getElementById('isopen-label-' + id);
+            if (this.checked) {
+                label.textContent = 'Ouvert';
+                label.classList.remove('closed');
+                label.classList.add('open');
+            } else {
+                label.textContent = 'Fermé';
+                label.classList.remove('open');
+                label.classList.add('closed');
+            }
+            const calendarId = this.dataset.id;
+            const isOpen = this.checked ? 1 : 0;
+
+            fetch('/calendar/toggle-isopen/' + calendarId, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': '{{ csrf_token("toggle-isopen") }}'
+                },
+                body: JSON.stringify({ isopen: isOpen })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (!data.success) {
+                    alert('Erreur lors de la mise à jour');
+                    this.checked = !this.checked; // revert
+                }
+            })
+            .catch(() => {
+                alert('Erreur lors de la mise à jour');
+                this.checked = !this.checked; // revert
+            });
+        });
+    });
+}); #}
+</script>
 {% endblock %}

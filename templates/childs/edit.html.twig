@@ -155,6 +155,45 @@
             margin-top: 0.25rem;
             grid-column: 1 / -1;
         }
+
+        /* Styles pour la modale d'édition de responsable */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgb(0,0,0);
+            background-color: rgba(0,0,0,0.4);
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 500px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .close-modal {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close-modal:hover,
+        .close-modal:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
     </style>
 {% endblock %}
 
@@ -276,10 +315,21 @@
                                     {{ respChild.responsable.prenom }} {{ respChild.responsable.nom }}
                                     ({{ respChild.responsable.tel }}) Lien : {{ respChild.lien }}
                                 </div>
-                                <button type="button" class="btn btn-danger btn-sm remove-responsable" 
-                                        data-id="{{ respChild.responsable.id }}">
-                                    Supprimer
-                                </button>
+                                <div>
+                                    <button type="button" class="btn btn-sm btn-warning edit-responsable-btn"
+                                            data-responsable-id="{{ respChild.responsable.id }}"
+                                            data-nom="{{ respChild.responsable.nom }}"
+                                            data-prenom="{{ respChild.responsable.prenom }}"
+                                            data-email="{{ respChild.responsable.email }}"
+                                            data-tel="{{ respChild.responsable.tel }}"
+                                            data-lien="{{ respChild.lien }}">
+                                        Modifier
+                                    </button>
+                                    <button type="button" class="btn btn-danger btn-sm remove-responsable" 
+                                            data-id="{{ respChild.responsable.id }}">
+                                        Supprimer
+                                    </button>
+                                </div>
                             </div>
                         {% endfor %}
                     {% else %}
@@ -336,6 +386,49 @@
                 </div>
             </form>
         </div>
+
+        {# Modale pour l'édition d'un responsable #}
+        <div id="editResponsableModal" class="modal" style="display:none;">
+            <div class="modal-content">
+                <span class="close-modal" style="float:right;cursor:pointer;">&times;</span>
+                <h3>Modifier le responsable</h3>
+                <form id="editResponsableForm">
+                    <input type="hidden" name="responsable_id" id="editResponsableId">
+                    <div class="form-group">
+                        <label for="editResponsableNom">Nom</label>
+                        <input type="text" name="nom" id="editResponsableNom" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editResponsablePrenom">Prénom</label>
+                        <input type="text" name="prenom" id="editResponsablePrenom" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editResponsableEmail">Email</label>
+                        <input type="email" name="email" id="editResponsableEmail" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="editResponsableTel">Téléphone</label>
+                        <input type="text" name="tel" id="editResponsableTel" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="editResponsableLien">Lien</label>
+                        <select id="editResponsableLien" name="lien" class="form-control" required>
+                            <option value="Père">Père</option>
+                            <option value="Mère">Mère</option>
+                            <option value="Tuteur légal">Tuteur légal</option>
+                            <option value="Grand-Parent">Grand-Parent</option>
+                            <option value="Famille">Famille</option>
+                            <option value="Autre">Autre</option>
+                        </select>
+                        {# <input type="text" name="lien" id="editResponsableLien" class="form-control"> #}
+                    </div>
+                    <div class="form-buttons">
+                        <button type="button" class="btn btn-secondary close-modal">Annuler</button>
+                        <button type="submit" class="btn btn-primary">Valider</button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 {% endblock %}
 
@@ -350,6 +443,8 @@
             const cancelButton = document.getElementById('cancelResponsableForm');
             const form = document.getElementById('newResponsableForm');
             const saveButton = document.getElementById('saveNewResponsable');
+            const editResponsableModal = document.getElementById('editResponsableModal');
+            const closeModalButtons = document.querySelectorAll('.close-modal');
 
             // Vérifier si les éléments existent
             if (!showFormButton) {
@@ -372,6 +467,10 @@
                 console.error('Le bouton saveButton est introuvable');
                 return;
             }
+            if (!editResponsableModal) {
+                console.error('La modale editResponsableModal est introuvable');
+                return;
+            }
 
             // Afficher le formulaire
             showFormButton.onclick = function() {
@@ -386,7 +485,7 @@
                 form.reset();
             };
 
-            // Gérer la soumission du formulaire
+            // Gérer la soumission du formulaire d'ajout
             saveButton.onclick = async function() {
                 // Vérifier la validité du formulaire
                 if (!form.checkValidity()) {
@@ -449,6 +548,81 @@
                     }
                 } catch (error) {
                     alert('Erreur : ' + error.message);
+                }
+            };
+
+            // Ouvrir la modale d'édition
+            document.querySelectorAll('.edit-responsable-btn').forEach(button => {
+                button.onclick = function() {
+                    const responsableId = this.getAttribute('data-responsable-id');
+                    const nom = this.getAttribute('data-nom');
+                    const prenom = this.getAttribute('data-prenom');
+                    const email = this.getAttribute('data-email');
+                    const tel = this.getAttribute('data-tel');
+                    const lien = this.getAttribute('data-lien');
+                    const selectLien = document.getElementById('editResponsableLien');
+                    
+                    // Remplir les champs de la modale
+                    document.getElementById('editResponsableId').value = responsableId;
+                    document.getElementById('editResponsableNom').value = nom;
+                    document.getElementById('editResponsablePrenom').value = prenom;
+                    document.getElementById('editResponsableEmail').value = email;
+                    document.getElementById('editResponsableTel').value = tel;
+
+                    // Parcours toutes les options pour trouver celle qui correspond
+                    Array.from(selectLien.options).forEach(option => {
+                        if (option.value === lien) {
+                            option.selected = true;
+                        }
+                    });
+                    
+                    // Afficher la modale
+                    editResponsableModal.style.display = 'block';
+                };
+            });
+
+            // Fermer la modale
+            closeModalButtons.forEach(button => {
+                button.onclick = function() {
+                    editResponsableModal.style.display = 'none';
+                };
+            });
+
+            // Gérer la soumission du formulaire d'édition
+            document.getElementById('editResponsableForm').onsubmit = async function(event) {
+                event.preventDefault();
+
+                const responsableId = document.getElementById('editResponsableId').value;
+                const url = `/childs/{{ child.id }}/edit-responsable/${responsableId}`;
+
+                const formData = {
+                    nom: document.getElementById('editResponsableNom').value,
+                    prenom: document.getElementById('editResponsablePrenom').value,
+                    email: document.getElementById('editResponsableEmail').value,
+                    tel: document.getElementById('editResponsableTel').value,
+                    lien: document.getElementById('editResponsableLien').value
+                };
+
+                try {
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        body: JSON.stringify(formData)
+                    });
+
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        window.location.reload();
+                    } else {
+                        alert(data.message || 'Erreur lors de la modification');
+                    }
+                } catch (error) {
+                    console.error('Erreur:', error);
+                    alert('Erreur lors de la modification');
                 }
             };
         });

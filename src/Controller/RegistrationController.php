@@ -28,12 +28,21 @@ class RegistrationController extends AbstractController
             // encode the plain password
             $user->setPassword($userPasswordHasher->hashPassword($user, $plainPassword));
 
+            // Ajout automatique du rôle ROLE_USER
+            $roles = $user->getRoles();
+            $roles[] = 'ROLE_USER';
+            $roles = array_unique($roles);
+            $user->setRoles($roles);
+
             $entityManager->persist($user);
             $entityManager->flush();
 
             // do anything else you need here, like send an email
 
-            return $security->login($user, 'form_login', 'main');
+            // return $security->login($user, 'form_login', 'main');
+
+            // Redirection vers la liste des utilisateurs
+            return $this->redirectToRoute('app_users_index');
         }
 
         return $this->render('registration/register.html.twig', [

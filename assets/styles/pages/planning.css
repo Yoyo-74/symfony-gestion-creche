@@ -1,0 +1,188 @@
+/* Styles du planning */
+.planning-container {
+  padding: var(--spacing-xl) 0;
+}
+
+.planning-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-xl);
+}
+
+.planning-title {
+  margin: 0;
+  color: var(--dark-gray);
+}
+
+.planning-controls {
+  display: flex;
+  gap: var(--spacing-md);
+  align-items: center;
+}
+
+.planning-date {
+  background: var(--white);
+  padding: var(--spacing-lg);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-sm);
+  margin-bottom: var(--spacing-xl);
+  text-align: center;
+}
+
+.planning-date h2 {
+  margin: 0;
+  color: var(--dark-gray);
+  font-size: var(--font-size-xl);
+}
+
+.planning-date .date-info {
+  color: var(--gray);
+  font-size: var(--font-size-base);
+  margin-top: var(--spacing-sm);
+}
+
+.planning-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-xl);
+}
+
+.summary-card {
+  background: var(--white);
+  padding: var(--spacing-lg);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-sm);
+  text-align: center;
+}
+
+.summary-number {
+  font-size: var(--font-size-xxl);
+  font-weight: bold;
+  color: var(--primary-color);
+  margin-bottom: var(--spacing-sm);
+}
+
+.summary-label {
+  color: var(--gray);
+  font-size: var(--font-size-sm);
+}
+
+.planning-table-container {
+  background: var(--white);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+.planning-table-header {
+  background: var(--primary-color);
+  color: var(--white);
+  padding: var(--spacing-md);
+  font-weight: 600;
+}
+
+.planning-table-wrapper {
+  overflow-x: auto;
+}
+
+/* Styles spécifiques pour les heures */
+.hour-cell {
+  position: relative;
+  min-width: 80px;
+  text-align: center;
+}
+
+.hour-cell input {
+  width: 100%;
+  border: none;
+  background: transparent;
+  text-align: center;
+  padding: var(--spacing-xs);
+  font-size: var(--font-size-sm);
+}
+
+.hour-cell input:focus {
+  background: var(--light-gray);
+  outline: 2px solid var(--primary-color);
+}
+
+.hour-cell.arrival {
+  background: rgba(40, 167, 69, 0.1);
+}
+
+.hour-cell.departure {
+  background: rgba(220, 53, 69, 0.1);
+}
+
+/* Styles pour les présences */
+.presence-cell {
+  text-align: center;
+  font-weight: 600;
+}
+
+.presence-present {
+  background: var(--success-color);
+  color: var(--white);
+}
+
+.presence-absent {
+  background: var(--danger-color);
+  color: var(--white);
+}
+
+.presence-unknown {
+  background: var(--secondary-color);
+  color: var(--white);
+}
+
+/* Actions du planning */
+.planning-actions {
+  display: flex;
+  justify-content: center;
+  gap: var(--spacing-md);
+  margin-top: var(--spacing-xl);
+  padding: var(--spacing-md);
+  background: var(--light-gray);
+  border-radius: var(--border-radius);
+}
+
+/* Responsive planning */
+@media (max-width: 1200px) {
+  .planning-table {
+    font-size: var(--font-size-sm);
+  }
+  
+  .planning-table th,
+  .planning-table td {
+    padding: var(--spacing-xs);
+  }
+}
+
+@media (max-width: 900px) {
+  .planning-header {
+    flex-direction: column;
+    gap: var(--spacing-md);
+    text-align: center;
+  }
+  
+  .planning-controls {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  .planning-summary {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .planning-summary {
+    grid-template-columns: 1fr;
+  }
+  
+  .planning-actions {
+    flex-direction: column;
+  }
+}

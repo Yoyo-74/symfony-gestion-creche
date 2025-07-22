@@ -122,6 +122,7 @@
 
 {% block javascripts %}
     {{ parent() }}
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
 {% endblock %}
 
 {% block body %}
@@ -246,7 +247,7 @@
         <div class="action-buttons">
             <a href="{{ path('app_childs_index') }}" class="btn btn-secondary">Retour à la liste</a>
             <a href="{{ path('app_childs_edit', {'id': child.id}) }}" class="btn btn-primary">Modifier</a>
-            {{ include('childs/_delete_form.html.twig') }}
+            {# {{ include('childs/_delete_form.html.twig') }} #}
         </div>
     </div>
 {% endblock %}

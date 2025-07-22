@@ -1,0 +1,45 @@
+/* Variables CSS globales */
+:root {
+  /* Couleurs principales */
+  --primary-color: #2980b9;
+  --secondary-color: #95a5a6;
+  --success-color: #28a745;
+  --danger-color: #e74c3c;
+  --warning-color: #ffc107;
+  --info-color: #3498db;
+  
+  /* Couleurs de fond */
+  --body-bg: skyblue;
+  --white: #fff;
+  --light-gray: #f8f9fa;
+  --gray: #6c757d;
+  --dark-gray: #2c3e50;
+  
+  /* Espacements */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+  --spacing-xxl: 3rem;
+  
+  /* Bordures */
+  --border-radius: 8px;
+  --border-radius-sm: 4px;
+  --border-radius-lg: 10px;
+  
+  /* Ombres */
+  --shadow-sm: 0 2px 4px rgba(0,0,0,0.1);
+  --shadow-md: 0 4px 8px rgba(0,0,0,0.1);
+  --shadow-lg: 0 8px 16px rgba(0,0,0,0.15);
+  
+  /* Typographie */
+  --font-size-sm: 0.875rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.1rem;
+  --font-size-xl: 1.2rem;
+  --font-size-xxl: 1.5rem;
+  
+  /* Conteneur */
+  --container-max-width: 1200px;
+}
