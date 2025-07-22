@@ -336,4 +336,46 @@ final class ChildsController extends AbstractController
             ], 500);
         }
     }
+
+    #[Route('/{id}/edit-responsable/{responsableId}', name: 'app_childs_edit_responsable', methods: ['POST'])]
+    public function editResponsable(
+        Request $request,
+        Childs $child,
+        int $responsableId,
+        EntityManagerInterface $entityManager,
+        ResponsablesRepository $responsablesRepository
+    ): JsonResponse {
+        try {
+            $responsable = $responsablesRepository->find($responsableId);
+            if (!$responsable) {
+                return new JsonResponse(['success' => false, 'message' => 'Responsable non trouvé'], 404);
+            }
+
+            $data = json_decode($request->getContent(), true);
+            if (!$data) {
+                return new JsonResponse(['success' => false, 'message' => 'Données invalides'], 400);
+            }
+
+            $responsable->setNom($data['nom'] ?? $responsable->getNom());
+            $responsable->setPrenom($data['prenom'] ?? $responsable->getPrenom());
+            $responsable->setEmail($data['email'] ?? $responsable->getEmail());
+            $responsable->setTel($data['tel'] ?? $responsable->getTel());
+
+            // Mise à jour du lien dans la table pivot
+            $responsablesChilds = $entityManager->getRepository(ResponsablesChilds::class)
+                ->findOneBy(['child' => $child, 'responsable' => $responsable]);
+            if ($responsablesChilds && isset($data['lien'])) {
+                $responsablesChilds->setLien($data['lien']);
+            }
+
+            $entityManager->flush();
+            return new JsonResponse(['success' => true]);
+
+        } catch (\Exception $e) {
+            return new JsonResponse([
+                'success' => false, 
+                'message' => 'Erreur serveur: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 }

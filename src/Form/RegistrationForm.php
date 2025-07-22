@@ -4,13 +4,16 @@ namespace App\Form;
 
 use App\Entity\Users;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
-use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\FormBuilderInterface;
-use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\IsTrue;
 use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Form\Extension\Core\Type\TelType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
+use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 
 class RegistrationForm extends AbstractType
 {
@@ -22,7 +25,7 @@ class RegistrationForm extends AbstractType
                 'mapped' => false,
                 'constraints' => [
                     new IsTrue([
-                        'message' => 'You should agree to our terms.',
+                        'message' => 'Vous devez accepter les conditions.',
                     ]),
                 ],
             ])
@@ -30,6 +33,7 @@ class RegistrationForm extends AbstractType
                 // instead of being set onto the object directly,
                 // this is read and encoded in the controller
                 'mapped' => false,
+                'label' => 'Mot de passe',
                 'attr' => ['autocomplete' => 'new-password'],
                 'constraints' => [
                     new NotBlank([
@@ -42,6 +46,21 @@ class RegistrationForm extends AbstractType
                         'max' => 4096,
                     ]),
                 ],
+            ])
+            ->add('nom', TextType::class)
+            ->add('prenom', TextType::class)
+            ->add('tel', TelType::class)
+            ->add('adress', TextType::class, ['required' => false])
+            ->add('cp', TextType::class, ['required' => false])
+            ->add('ville', TextType::class, ['required' => false])
+            ->add('roles', ChoiceType::class, [
+                'label' => 'Rôle',
+                'choices'  => [
+                    'Admin' => 'ROLE_ADMIN',
+                    'Staff' => 'ROLE_STAFF',
+                ],
+                'expanded' => true,
+                'multiple' => true,
             ])
         ;
     }

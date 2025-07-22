@@ -439,25 +439,25 @@
             const formContainer = document.getElementById('newChildFormContainer');
             const cancelButton = document.getElementById('cancelChildForm');
 
-            // Vérification de l'existence des éléments
+            // Vérification de l'existence des éléments - AJOUT DE GUARDS
             if (!childForm) {
-                console.error('Le formulaire newChildForm est introuvable');
-                return;
+                console.log('Le formulaire newChildForm n\'est pas présent sur cette page');
+                return; // Sortir silencieusement si pas sur la bonne page
             }
             if (!submitButton) {
-                console.error('Le bouton submitChildForm est introuvable');
+                console.log('Le bouton submitChildForm n\'est pas présent');
                 return;
             }
             if (!showFormButton) {
-                console.error('Le bouton showChildForm est introuvable');
+                console.log('Le bouton showChildForm n\'est pas présent');
                 return;
             }
             if (!formContainer) {
-                console.error('Le conteneur newChildFormContainer est introuvable');
+                console.log('Le conteneur newChildFormContainer n\'est pas présent');
                 return;
             }
             if (!cancelButton) {
-                console.error('Le bouton cancelChildForm est introuvable');
+                console.log('Le bouton cancelChildForm n\'est pas présent');
                 return;
             }
 

@@ -1,0 +1,130 @@
+/* Styles des tableaux */
+.table {
+  margin: 20px auto;
+  width: 100%;
+  border-collapse: collapse;
+  background-color: var(--white);
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.table th,
+.table td {
+  padding: var(--spacing-sm) var(--spacing-md);
+  text-align: left;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.table th {
+  background-color: var(--light-gray);
+  font-weight: 600;
+  color: var(--dark-gray);
+  border-bottom: 2px solid #dee2e6;
+}
+
+.table tbody tr:hover {
+  background-color: #f8f9fa;
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+  background-color: rgba(0,0,0,.05);
+}
+
+.table-responsive {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Styles spécifiques pour les tables de présences */
+.planning-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: var(--white);
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  margin-bottom: var(--spacing-xl);
+}
+
+.planning-table th,
+.planning-table td {
+  padding: var(--spacing-sm);
+  text-align: center;
+  border: 1px solid #dee2e6;
+  font-size: var(--font-size-sm);
+}
+
+.planning-table th {
+  background-color: var(--primary-color);
+  color: var(--white);
+  font-weight: 600;
+}
+
+.planning-table tbody tr:hover {
+  background-color: #f8f9fa;
+}
+
+.planning-table .child-name {
+  text-align: left;
+  font-weight: 600;
+  min-width: 120px;
+}
+
+.planning-table .age-column {
+  font-weight: 500;
+  color: var(--gray);
+}
+
+.planning-table .alert-column {
+  width: 30px;
+  padding: var(--spacing-xs);
+}
+
+.planning-table .hour-column {
+  width: 80px;
+  min-width: 80px;
+}
+
+.planning-table .presence-column {
+  width: 100px;
+  font-weight: 600;
+}
+
+.planning-table .present {
+  background-color: var(--success-color);
+  color: var(--white);
+}
+
+.planning-table .absent {
+  background-color: var(--danger-color);
+  color: var(--white);
+}
+
+/* Icône d'alerte pour les tables */
+.alert-icon {
+  color: var(--warning-color);
+  font-size: 1.3em;
+  cursor: pointer;
+  position: relative;
+  outline: none;
+}
+
+.alert-icon:hover::after,
+.alert-icon:focus::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  left: 120%;
+  top: 50%;
+  transform: translateY(-50%);
+  background: #fffbe6;
+  color: #333;
+  border: 1px solid var(--warning-color);
+  border-radius: var(--border-radius-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
+  white-space: pre-line;
+  min-width: 180px;
+  z-index: 100;
+  box-shadow: var(--shadow-md);
+  font-size: 0.95em;
+}

@@ -1,0 +1,114 @@
+/* Styles de navigation */
+.navbar {
+  background-color: var(--primary-color);
+  padding: var(--spacing-md) 0;
+  box-shadow: var(--shadow-sm);
+}
+
+.navbar .container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.navbar-brand {
+  color: var(--white);
+  font-size: var(--font-size-xl);
+  font-weight: bold;
+  text-decoration: none;
+}
+
+.navbar-brand:hover {
+  color: var(--white);
+}
+
+.navbar-nav {
+  display: flex;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  gap: var(--spacing-lg);
+}
+
+.navbar-nav a {
+  color: var(--white);
+  text-decoration: none;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--border-radius-sm);
+  transition: background-color 0.2s ease;
+}
+
+.navbar-nav a:hover {
+  background-color: rgba(255,255,255,0.1);
+  color: var(--white);
+}
+
+/* Navigation de pagination */
+.week-navigation {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-md);
+  flex-wrap: wrap;
+  padding: var(--spacing-md) 0;
+  margin-bottom: var(--spacing-xl);
+}
+
+.week-navigation .week-number {
+  font-size: var(--font-size-lg);
+  font-weight: bold;
+  text-align: center;
+  flex: 1 1 100px;
+}
+
+.week-navigation .btn {
+  flex: 0 0 auto;
+  min-width: 120px;
+  text-align: center;
+}
+
+.planning-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-md);
+  flex-wrap: wrap;
+  padding: var(--spacing-md) 0;
+  margin-bottom: var(--spacing-xl);
+}
+
+.planning-nav h2 {
+  margin: 0;
+  text-align: center;
+  flex: 1;
+}
+
+/* Navigation responsive */
+@media (max-width: 600px) {
+  .week-navigation {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--spacing-sm);
+  }
+  
+  .week-navigation .week-number {
+    font-size: var(--font-size-base);
+    margin: var(--spacing-sm) 0;
+  }
+  
+  .week-navigation .btn {
+    width: 100%;
+    min-width: unset;
+  }
+  
+  .planning-nav {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--spacing-sm);
+  }
+  
+  .planning-nav .btn {
+    width: 100%;
+    min-width: unset;
+  }
+}

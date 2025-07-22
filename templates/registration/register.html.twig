@@ -1,19 +1,107 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Register{% endblock %}
+{% block title %}Créer un utilisateur{% endblock %}
+
+{% block stylesheets %}
+    <style>
+        .register-form-container {
+            max-width: 500px;
+            margin: 2rem auto;
+            background: #f8f9fa;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px #0001;
+            padding: 2rem 2.5rem;
+        }
+        .register-form-container h1 {
+            text-align: center;
+            margin-bottom: 1.5rem;
+            color: #2c3e50;
+        }
+        .register-form-container label {
+            font-weight: 600;
+            color: #34495e;
+        }
+        .register-form-container input[type="text"],
+        .register-form-container input[type="email"],
+        .register-form-container input[type="password"],
+        .register-form-container input[type="tel"] {
+            width: 100%;
+            padding: 0.5rem 0.75rem;
+            margin-bottom: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background: #fff;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+        .register-form-container input[type="text"]:focus,
+        .register-form-container input[type="email"]:focus,
+        .register-form-container input[type="password"]:focus,
+        .register-form-container input[type="tel"]:focus {
+            border-color: #2980b9;
+            outline: none;
+        }
+        .register-form-container .form-check {
+            margin-bottom: 1rem;
+        }
+        .register-form-container .form-check-label {
+            margin-left: 0.5rem;
+            font-weight: 400;
+        }
+        .register-form-container .roles-group {
+            margin-bottom: 1rem;
+        }
+        .register-form-container .roles-group label {
+            margin-right: 1.5rem;
+        }
+        .register-form-container button[type="submit"] {
+            width: 100%;
+            background: #2980b9;
+            color: #fff;
+            border: none;
+            padding: 0.75rem;
+            border-radius: 5px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .register-form-container button[type="submit"]:hover {
+            background: #1c5d8c;
+        }
+        .register-form-container .form-error-message {
+            color: #c0392b;
+            margin-bottom: 1rem;
+            font-size: 0.95rem;
+        }
+    </style>
+{% endblock %}
 
 {% block body %}
-    <h1>Register</h1>
+<div class="register-form-container">
+    <h1>Créer un utilisateur</h1>
 
     {{ form_errors(registrationForm) }}
 
     {{ form_start(registrationForm) }}
         {{ form_row(registrationForm.email) }}
-        {{ form_row(registrationForm.plainPassword, {
-            label: 'Password'
-        }) }}
+        {{ form_row(registrationForm.plainPassword) }}
+        {{ form_row(registrationForm.nom) }}
+        {{ form_row(registrationForm.prenom) }}
+        {{ form_row(registrationForm.tel) }}
+        {{ form_row(registrationForm.adress) }}
+        {{ form_row(registrationForm.cp) }}
+        {{ form_row(registrationForm.ville) }}
+
+        <div class="roles-group">
+            {{ form_label(registrationForm.roles) }}
+            {{ form_widget(registrationForm.roles) }}
+            {{ form_errors(registrationForm.roles) }}
+        </div>
+
         {{ form_row(registrationForm.agreeTerms) }}
 
-        <button type="submit" class="btn">Register</button>
+        <button type="submit">Créer l'utilisateur</button>
     {{ form_end(registrationForm) }}
+</div>
 {% endblock %}

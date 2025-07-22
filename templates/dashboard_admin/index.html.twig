@@ -5,7 +5,7 @@
 {% block stylesheets %}
     {{ parent() }}
     <style>
-        .stats-container {
+        {# .stats-container {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 20px;
@@ -27,13 +27,13 @@
         .stat-label {
             color: #7f8c8d;
             font-size: 1.1em;
-        }
+        } #}
     </style>
 {% endblock %}
 
 {% block body %}
     <div class="container">
-        <h1 class="my-4">Tableau de bord de la crèche</h1>
+        <h1 class="my-4 text-center">Tableau de bord de la crèche</h1>
         
         <div class="stats-container">
             <div class="stat-card">
