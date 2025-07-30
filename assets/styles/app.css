@@ -1,7 +1,7 @@
 /* Fichier principal - les imports sont gérés par JavaScript */
 
 /* Removed invalid import statement. Use JS or @import in CSS if needed. */
-@import './pages/calendar.css';
+
 /* ===== STYLES SPÉCIFIQUES DU PROJET ===== */
 /* Styles qui ne rentrent dans aucune catégorie ou qui surchargent les autres */
 
@@ -518,6 +518,7 @@ th { text-align: left; }
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             flex: 1;
             min-height: 400px;
+            margin-bottom: 1rem;
         }
 
         .schedule-table {
@@ -621,9 +622,19 @@ th { text-align: left; }
             color: #333;
         }
 
-        .form-group input,
+        .form-group input {
+            width: 95%;
+            padding: 0.5rem;
+            border: 1px solid #ced4da;
+            border-radius: 0.25rem;
+            font-size: 1rem;
+        }
+        #lien {
+          width: 100%;
+        }
+
         .form-group select {
-            width: 100%;
+            width: 45%;
             padding: 0.5rem;
             border: 1px solid #ced4da;
             border-radius: 0.25rem;
@@ -634,7 +645,7 @@ th { text-align: left; }
             position: relative;
         }
 
-        .add-responsable-btn {
+        /* .add-responsable-btn {
             position: absolute;
             top: -40px;
             right: 0;
@@ -650,12 +661,12 @@ th { text-align: left; }
             align-items: center;
             justify-content: center;
             transition: all 0.3s;
-        }
+        } */
 
-        .add-responsable-btn:hover {
+        /* .add-responsable-btn:hover {
             transform: scale(1.1);
             background: #218838;
-        }
+        } */
 
         .responsable-form {
             background: #f8f9fa;
@@ -845,12 +856,6 @@ th { text-align: left; }
             margin-top: 0.25rem;
         }
 
-        /* Nouveaux styles pour les champs de responsables */
-        .responsable-field {
-            {# margin-bottom: 1rem;
-            padding: 0.5rem; #}
-        }
-
         .responsable-field label {
             display: block;
             margin-bottom: 0.5rem;
@@ -862,7 +867,6 @@ th { text-align: left; }
             width: 95%;
             padding: 0.2rem;
             font-size: 1rem;
-            {# line-height: 1.5; #}
             color: #495057;
             background-color: #fff;
             border: 1px solid #ced4da;
@@ -888,4 +892,8 @@ th { text-align: left; }
             padding: 1rem;
             border-radius: 0.25rem;
             margin-bottom: 1rem;
+        }
+
+        .padding-right > th {
+            padding-right: 1rem;
         }
