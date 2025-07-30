@@ -33,7 +33,7 @@
             font-weight: bold;
         }
         .form-control {
-            width: 100%;
+            width: 95%;
             padding: 0.5rem;
             border: 1px solid #ddd;
             border-radius: 4px;
@@ -43,14 +43,14 @@
             width: auto;
             margin-right: 0.5rem;
         }
-        .action-buttons {
+        {# .action-buttons {
             margin-top: 2rem;
             display: flex;
             gap: 1rem;
             justify-content: flex-start;
             align-items: center;
-        }
-        .btn {
+        } #}
+        {# .btn {
             padding: 0.5rem 1rem;
             border-radius: 4px;
             text-decoration: none;
@@ -58,23 +58,23 @@
             border: none;
             cursor: pointer;
             transition: background-color 0.2s;
-        }
-        .btn-primary {
+        } #}
+        {# .btn-primary {
             background-color: #3498db;
             color: white;
-        }
-        .btn-secondary {
+        } #}
+        {# .btn-secondary {
             background-color: #95a5a6;
             color: white;
-        }
-        .btn-danger {
+        } #}
+        {# .btn-danger {
             background-color: #e74c3c;
             color: white;
-        }
-        .btn-success {
+        } #}
+        {# .btn-success {
             background-color: #2ecc71;
             color: white;
-        }
+        } #}
         .responsable-form {
             background: #f8f9fa;
             padding: 1.5rem;
@@ -171,7 +171,7 @@
             <h2 class="info-header">Responsables</h2>
             <div class="responsables-container" data-prototype="{{ include('childs/_add_responsable_form.html.twig', {'name': '__name__'})|e('html_attr') }}">
                 <div class="responsables-list"></div>
-                <button type="button" class="btn add-responsable-btn">Ajouter un responsable</button>
+                <button type="button" class="btn add-responsable-btn-noabsolute">Ajouter un responsable</button>
             </div>
         </div>
 
@@ -189,13 +189,13 @@
         function setupResponsablesForm() {
             const container = document.querySelector('.responsables-container');
             if (!container) return;
-            const addButton = container.querySelector('.add-responsable-btn');
+            const addButton = container.querySelector('.add-responsable-btn-noabsolute');
             const list = container.querySelector('.responsables-list');
             let index = list.children.length;
 
             // Supprimer tout ancien gestionnaire pour éviter les doublons
             addButton.replaceWith(addButton.cloneNode(true));
-            const newAddButton = container.querySelector('.add-responsable-btn');
+            const newAddButton = container.querySelector('.add-responsable-btn-noabsolute');
 
             newAddButton.addEventListener('click', function() {
                 const prototype = container.dataset.prototype;

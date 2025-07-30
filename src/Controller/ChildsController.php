@@ -378,4 +378,52 @@ final class ChildsController extends AbstractController
             ], 500);
         }
     }
+
+    #[Route('/{id}/unsubscribe', name: 'app_childs_unsubscribe', methods: ['POST'])]
+    public function unsubscribe(
+        Childs $child,
+        EntityManagerInterface $entityManager
+    ): JsonResponse {
+        try {
+            // Vérifier que l'enfant n'est pas déjà désinscrit
+            if ($child->getDateSortie() !== null) {
+                return new JsonResponse([
+                    'success' => false,
+                    'message' => 'Cet enfant est déjà désinscrit.'
+                ], 400);
+            }
+
+            $today = new \DateTime();
+            
+            // Mettre à jour la date de sortie
+            $child->setDateSortie($today);
+            
+            // Supprimer les entrées CalendarChilds futures
+            $calendarChildsRepo = $entityManager->getRepository(CalendarChilds::class);
+            $futureEntries = $calendarChildsRepo->createQueryBuilder('cc')
+                ->where('cc.child = :child')
+                ->andWhere('cc.date > :today')
+                ->setParameter('child', $child)
+                ->setParameter('today', $today)
+                ->getQuery()
+                ->getResult();
+
+            foreach ($futureEntries as $entry) {
+                $entityManager->remove($entry);
+            }
+            
+            $entityManager->flush();
+
+            return new JsonResponse([
+                'success' => true,
+                'message' => 'L\'enfant a été désinscrit avec succès.'
+            ]);
+
+        } catch (\Exception $e) {
+            return new JsonResponse([
+                'success' => false,
+                'message' => 'Une erreur est survenue : ' . $e->getMessage()
+            ], 500);
+        }
+    }
 }

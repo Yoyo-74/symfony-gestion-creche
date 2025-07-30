@@ -66,3 +66,64 @@
   justify-content: flex-start;
   align-items: center;
 }
+
+.add-responsable-btn {
+    position: absolute;
+    top: -40px;
+    right: 0;
+    background: var(--success-color);
+    color: var(--white);
+    border: none;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    font-size: 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s;
+}
+
+.add-responsable-btn:hover {
+    transform: translateY(-1px);
+    background: color-mix(in srgb, var(--success-color) 90%, black 10%);
+}
+
+.add-responsable-btn-noabsolute {
+  margin-top: 1rem;
+  background-color: var(--success-color);
+  color: var(--white);
+}
+
+.add-responsable-btn-noabsolute:hover {
+    transform: translateY(-1px);
+    background: color-mix(in srgb, var(--success-color) 90%, black 10%);
+}
+
+/* Bouton de désinscription */
+.btn-unsubscribe {
+  background: var(--danger-color);
+  color: var(--white);
+  border: 1px solid var(--danger-color);
+  transition: all 0.3s ease;
+}
+
+.btn-unsubscribe:hover {
+  background: color-mix(in srgb, var(--danger-color) 85%, black 15%);
+  border-color: color-mix(in srgb, var(--danger-color) 85%, black 15%);
+  color: var(--white);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.btn-unsubscribe:focus {
+  background: color-mix(in srgb, var(--danger-color) 85%, black 15%);
+  border-color: color-mix(in srgb, var(--danger-color) 85%, black 15%);
+  color: var(--white);
+  box-shadow: 0 0 0 0.2rem rgba(231, 76, 60, 0.25);
+}
+
+.btn-unsubscribe i {
+  margin-right: var(--spacing-sm);
+}

@@ -52,7 +52,8 @@ class ChildsForm extends AbstractType
             ->add('revenus', MoneyType::class, [
                 'label' => 'Revenus',
                 'required' => false,
-                'currency' => 'EUR'
+                'currency' => 'EUR',
+                'compound' => false
             ])
             ->add('date_entree', DateType::class, [
                 'label' => 'Date d\'entrée',

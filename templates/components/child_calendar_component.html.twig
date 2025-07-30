@@ -21,116 +21,74 @@
     }
 </style>
 
-{# Debug: Afficher les données brutes #}
-<div style="display: none;">
-    <pre>Données du calendrier: {{ this.getEvents()|json_encode(constant('JSON_PRETTY_PRINT')) }}</pre>
-</div>
-
 <div {{ attributes }}>
-    <div id="calendar-{{ this.childId }}" 
-         data-child-id="{{ this.childId }}" 
-         data-events="{{ this.getEvents()|json_encode|e('html_attr') }}">
-    </div>
+    <div id="calendar-{{ this.childId }}"></div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
 <script>
-    (function() {
-        let calendar = null;
+function initializeCalendar() {
+    console.log('Initialisation du calendrier: calendar-{{ this.childId }}');
+    
+    // Vérifier que FullCalendar est disponible
+    if (typeof FullCalendar === 'undefined') {
+        console.warn('FullCalendar pas encore chargé, nouvelle tentative...');
+        setTimeout(initializeCalendar, 100);
+        return;
+    }
 
-        // Fonction d'initialisation du calendrier
-        function initializeCalendar() {
-            const calendarId = 'calendar-{{ this.childId }}';
-            console.log('Initialisation du calendrier:', calendarId);
-            
-            const calendarEl = document.getElementById(calendarId);
-            if (!calendarEl) {
-                console.error(`Élément calendrier #${calendarId} non trouvé`);
-                return;
-            }
+    const calendarEl = document.getElementById('calendar-{{ this.childId }}');
+    if (!calendarEl) {
+        console.error('Élément calendrier introuvable');
+        return;
+    }
 
-            // Si un calendrier existe déjà, le détruire
-            if (calendar) {
-                calendar.destroy();
-                calendar = null;
-            }
+    try {
+        // Utilise la méthode getEvents() de ton composant
+        const events = {{ this.getEvents()|json_encode|raw }};
+        console.log('Données brutes:', events);
 
-            try {
-                const eventsData = calendarEl.dataset.events;
-                console.log('Données brutes:', eventsData);
-                
-                const events = JSON.parse(eventsData || '[]');
-                console.log('Événements parsés:', events);
+        const calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth',
+            headerToolbar: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'dayGridMonth,timeGridWeek,timeGridDay'
+            },
+            locale: 'fr',
+            events: events,
+            eventDisplay: 'block',
+            dayMaxEvents: 3,
+            eventClick: function(info) {
+                console.log('Événement cliqué:', info.event);
+            },
+            height: 'auto'
+        });
 
-                calendar = new FullCalendar.Calendar(calendarEl, {
-                    initialView: 'dayGridMonth',
-                    locale: 'fr',
-                    headerToolbar: {
-                        left: 'prev,next today',
-                        center: 'title',
-                        right: 'dayGridMonth,timeGridWeek'
-                    },
-                    events: events,
-                    editable: true,
-                    eventDisplay: 'block',
-                    displayEventTime: true,
-                    slotMinTime: '07:00:00',
-                    slotMaxTime: '20:00:00',
-                    eventTimeFormat: {
-                        hour: '2-digit',
-                        minute: '2-digit',
-                        hour12: false
-                    },
-                    eventDidMount: function(info) {
-                        console.log('Événement monté:', info.event.title);
-                    },
-                    eventClick: function(info) {
-                        console.log('Clic sur événement:', info.event);
-                        const isPresent = !info.event.backgroundColor.includes('28a745');
-                        if (confirm(isPresent ? 'Marquer comme présent ?' : 'Marquer comme absent ?')) {
-                            this.dispatchEvent('updatePresence', {
-                                eventId: info.event.id,
-                                isPresent: isPresent
-                            });
-                            info.event.setProp('backgroundColor', isPresent ? '#28a745' : '#ffc107');
-                            info.event.setProp('borderColor', isPresent ? '#28a745' : '#ffc107');
-                        }
-                    }.bind(this),
-                    eventDrop: function(info) {
-                        console.log('Événement déplacé:', info.event);
-                        this.dispatchEvent('updateEvent', {
-                            eventId: info.event.id,
-                            start: info.event.start,
-                            end: info.event.end || info.event.start
-                        });
-                    }.bind(this),
-                    eventResize: function(info) {
-                        console.log('Événement redimensionné:', info.event);
-                        this.dispatchEvent('updateEvent', {
-                            eventId: info.event.id,
-                            start: info.event.start,
-                            end: info.event.end
-                        });
-                    }.bind(this)
-                });
+        calendar.render();
+        console.log('Calendrier initialisé avec succès');
+        
+    } catch (error) {
+        console.error('Erreur lors de l\'initialisation du calendrier:', error);
+    }
+}
 
-                calendar.render();
-                console.log('Calendrier initialisé avec succès');
-            } catch (error) {
-                console.error('Erreur lors de l\'initialisation du calendrier:', error);
-            }
-        }
+// Initialiser selon l'état du DOM
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeCalendar);
+} else {
+    setTimeout(initializeCalendar, 50);
+}
 
-        // Initialiser le calendrier quand le DOM est chargé
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initializeCalendar);
-        } else {
-            initializeCalendar();
-        }
+// Gérer Turbo
+document.addEventListener('turbo:load', function() {
+    setTimeout(initializeCalendar, 50);
+});
 
-        // Réinitialiser le calendrier lors des mises à jour du composant
-        document.addEventListener('turbo:load', initializeCalendar);
-        document.addEventListener('live:connect', initializeCalendar);
-        document.addEventListener('live:update', initializeCalendar);
-    })();
+// Gérer les reconnexions du composant Live
+document.addEventListener('live:connect', function(event) {
+    if (event.target.id === 'calendar-{{ this.childId }}' || event.target.closest('#calendar-{{ this.childId }}')) {
+        setTimeout(initializeCalendar, 50);
+    }
+});
 </script>

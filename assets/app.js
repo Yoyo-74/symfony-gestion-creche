@@ -1,10 +1,14 @@
 import './bootstrap.js';
 
 // Import direct de tous les fichiers CSS dans l'ordre (PAS app.css)
-// import './styles/base/variables.css';
+
+
+// Import de app.css EN DERNIER pour les surcharges
+
+import './styles/base/variables.css';
 // import './styles/base/reset.css';
 // import './styles/base/layout.css';
-// import './styles/components/buttons.css';
+import './styles/components/buttons.css';
 // import './styles/components/forms.css';
 // import './styles/components/tables.css';
 // import './styles/components/modals.css';
@@ -12,11 +16,9 @@ import './bootstrap.js';
 // import './styles/pages/dashboard.css';
 // import './styles/pages/users.css';
 // import './styles/pages/children.css';
-// import './styles/pages/calendar.css';
+import './styles/pages/calendar.css';
 // import './styles/pages/planning.css';
-// import './styles/pages/auth.css';
-
-// Import de app.css EN DERNIER pour les surcharges
+import './styles/pages/auth.css';
 import './styles/app.css';
 
 console.log('Page chargée avec AssetMapper');

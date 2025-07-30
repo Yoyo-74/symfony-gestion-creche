@@ -112,11 +112,11 @@
             border-radius: 4px;
         }
 
-        .add-responsable-btn {
+        {# .add-responsable-btn-noabsolute {
             margin-top: 1rem;
             background-color: #2ecc71;
             color: white;
-        }
+        } #}
 
         /* Styles pour le formulaire d'ajout de responsable */
         #newResponsableFormContainer {
@@ -146,7 +146,6 @@
             display: flex;
             justify-content: flex-end;
             gap: 1rem;
-            margin-top: 1rem;
         }
 
         .error-message {
@@ -315,8 +314,8 @@
                                     {{ respChild.responsable.prenom }} {{ respChild.responsable.nom }}
                                     ({{ respChild.responsable.tel }}) Lien : {{ respChild.lien }}
                                 </div>
-                                <div>
-                                    <button type="button" class="btn btn-sm btn-warning edit-responsable-btn"
+                                <div class="form-buttons">
+                                    <button type="button" class="btn btn-primary edit-responsable-btn"
                                             data-responsable-id="{{ respChild.responsable.id }}"
                                             data-nom="{{ respChild.responsable.nom }}"
                                             data-prenom="{{ respChild.responsable.prenom }}"
@@ -325,7 +324,7 @@
                                             data-lien="{{ respChild.lien }}">
                                         Modifier
                                     </button>
-                                    <button type="button" class="btn btn-danger btn-sm remove-responsable" 
+                                    <button type="button" class="btn btn-danger remove-responsable" 
                                             data-id="{{ respChild.responsable.id }}">
                                         Supprimer
                                     </button>
@@ -335,7 +334,7 @@
                     {% else %}
                         <p>Aucun responsable associé</p>
                     {% endif %}
-                    <button type="button" class="btn add-responsable-btn" id="showResponsableForm">
+                    <button type="button" class="btn add-responsable-btn-noabsolute" id="showResponsableForm">
                         Ajouter un responsable
                     </button>
                 </div>
@@ -344,7 +343,14 @@
             <div class="action-buttons">
                 <button type="submit" class="btn btn-primary">Enregistrer les modifications</button>
                 <a href="{{ path('app_childs_index') }}" class="btn btn-secondary">Retour à la liste</a>
-                {{ include('childs/_delete_form.html.twig') }}
+                
+                {% if child.dateSortie is null %}
+                    <button type="button" class="btn btn-danger btn-unsubscribe" onclick="unsubscribeChild({{ child.id }})">
+                        <i class="fas fa-user-times"></i> Désinscrire l'enfant
+                    </button>
+                {% endif %}
+                
+                {# {{ include('childs/_delete_form.html.twig') }} #}
             </div>
         {{ form_end(form) }}
 
@@ -626,5 +632,29 @@
                 }
             };
         });
+
+        function unsubscribeChild(childId) {
+            if (confirm('Êtes-vous sûr de vouloir désinscrire cet enfant ? Cette action mettra fin à son inscription à partir d\'aujourd\'hui.')) {
+                fetch(`/childs/${childId}/unsubscribe`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('L\'enfant a été désinscrit avec succès.');
+                        location.reload(); // Recharge la page pour masquer le bouton
+                    } else {
+                        alert('Erreur: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    alert('Une erreur est survenue: ' + error.message);
+                });
+            }
+        }
     </script>
 {% endblock %}
